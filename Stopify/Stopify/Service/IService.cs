@@ -1,4 +1,3 @@
-﻿namespace Stopify.Service
-{
-    public interface IService;
-}
+﻿namespace Stopify.Service;
+
+public interface IService;

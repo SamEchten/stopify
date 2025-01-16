@@ -1,41 +1,54 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Stopify.Repository
+namespace Stopify.Repository;
+public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : IRepository<TEntity> where TEntity : Entity.Entity
 {
-    public abstract class EntityRepository<TEntity> : IRepository<TEntity> where TEntity : class
+    protected readonly ApplicationDbContext Context = context;
+    protected readonly DbSet<TEntity> DbSet = context.Set<TEntity>();
+
+    public TEntity? GetById(int id)
     {
-        protected readonly ApplicationDbContext Context;
-        protected readonly DbSet<TEntity> DbSet;
+        return DbSet.Find(id);
+    }
 
-        public EntityRepository(ApplicationDbContext context)
-        {
-            Context = context;
-            DbSet = context.Set<TEntity>();
-        }
+    public IEnumerable<TEntity> GetAll()
+    {
+        return DbSet.ToList();
+    }
 
-        public TEntity? GetById(int id)
-        {
-            return DbSet.Find(id);
-        }
+    public void Add(TEntity entity)
+    {
+        DbSet.Add(entity);
+        
+        Context.SaveChanges();
+    }
 
-        public IEnumerable<TEntity> GetAll()
+    public TEntity Update(int id, TEntity entity)
+    {
+        var existingEntity = DbSet.Find(id)!;
+        
+        foreach (var property in Context.Entry(existingEntity).Properties)
         {
-            return DbSet.ToList();
-        }
+            if (property.Metadata.IsPrimaryKey())
+            {
+                continue;
+            }
 
-        public void Add(TEntity entity)
-        {
-            DbSet.Add(entity);
+            var newValue = Context.Entry(entity).Property(property.Metadata.Name).CurrentValue;
+            property.CurrentValue = newValue;
         }
+        
+        Context.SaveChanges();
 
-        public void Update(TEntity entity)
-        {
-            Context.Entry(entity).State = EntityState.Modified;
-        }
+        return existingEntity;
+    }
 
-        public void Delete(TEntity entity)
-        {
-            DbSet.Remove(entity);
-        }
+    public void Delete(int id)
+    {
+        var entity = DbSet.Find(id)!;
+        
+        DbSet.Remove(entity);
+        
+        Context.SaveChanges();
     }
 }

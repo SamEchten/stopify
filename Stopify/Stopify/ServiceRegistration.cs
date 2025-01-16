@@ -1,34 +1,32 @@
 ﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
 using Stopify.Repository;
 using Stopify.Service;
 
-namespace Stopify
+namespace Stopify;
+
+public static class ServiceRegistration
 {
-    public static class ServiceRegistration
+    public static void RegisterServices(IServiceCollection services, Assembly assembly)
     {
-        public static void RegisterServices(IServiceCollection services, Assembly assembly)
+        // Register DB Contextd
+        services.AddScoped<ApplicationDbContext>();
+
+        // Auto Register Repositories
+        var repositoryTypes = assembly.GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false } && type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRepository<>)));
+
+        foreach (var repositoryType in repositoryTypes)
         {
-            // Register DB Context
-            services.AddScoped<ApplicationDbContext>();
+            services.AddScoped(repositoryType);
+        }
 
-            // Register Repositories
-            var repositoryTypes = assembly.GetTypes()
-                .Where(type => type.IsClass && !type.IsAbstract && type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRepository<>)));
+        // Auto Register Services
+        var serviceTypes = assembly.GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(IService).IsAssignableFrom(type));
 
-            foreach (var repositoryType in repositoryTypes)
-            {
-                services.AddScoped(repositoryType);
-            }
-
-            // Register Services
-            var serviceTypes = assembly.GetTypes()
-                .Where(type => type.IsClass && !type.IsAbstract && typeof(IService).IsAssignableFrom(type));
-
-            foreach (var serviceType in serviceTypes)
-            {
-                services.AddScoped(serviceType);
-            }
+        foreach (var serviceType in serviceTypes)
+        {
+            services.AddScoped(serviceType);
         }
     }
 }

@@ -1,14 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Stopify.Entity.User;
 
-namespace Stopify
+namespace Stopify;
+public class ApplicationDbContext : DbContext
 {
-    public class ApplicationDbContext : DbContext
-    {
-        public DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; set; }
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-        }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    {
     }
 }
