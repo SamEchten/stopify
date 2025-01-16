@@ -8,7 +8,7 @@ public static class ServiceRegistration
 {
     public static void RegisterServices(IServiceCollection services, Assembly assembly)
     {
-        // Register DB Contextd
+        // Register DB Context
         services.AddScoped<ApplicationDbContext>();
 
         // Auto Register Repositories
