@@ -1,0 +1,6 @@
+@Stopify_HostAddress = http://localhost:5232
+
+GET {{Stopify_HostAddress}}/stopify/
+Accept: application/json
+
+###
