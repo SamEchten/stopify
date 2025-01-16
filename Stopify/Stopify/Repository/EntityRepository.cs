@@ -1,43 +1,41 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using EntityClass = Stopify.Entity.Entity;
 
 namespace Stopify.Repository
 {
-    public class EntityRepository : IRepository<EntityClass>
+    public abstract class EntityRepository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        private readonly DbContext _context;
-        private readonly DbSet<EntityClass> _dbSet;
+        protected readonly ApplicationDbContext Context;
+        protected readonly DbSet<TEntity> DbSet;
 
-        public EntityRepository(DbContext context)
+        public EntityRepository(ApplicationDbContext context)
         {
-            _context = context;
-            _dbSet = context.Set<EntityClass>();
-        }
-        
-        public EntityClass? GetById(int id)
-        {
-            return _dbSet.Find(id);
+            Context = context;
+            DbSet = context.Set<TEntity>();
         }
 
-        public IEnumerable<EntityClass> GetAll()
+        public TEntity? GetById(int id)
         {
-            return _dbSet.ToList();
+            return DbSet.Find(id);
         }
 
-        public void Add(EntityClass entity)
+        public IEnumerable<TEntity> GetAll()
         {
-            _dbSet.Add(entity);
+            return DbSet.ToList();
         }
 
-        public void Update(EntityClass entity)
+        public void Add(TEntity entity)
         {
-            _context.Entry(entity).State = EntityState.Modified;
+            DbSet.Add(entity);
         }
 
-        public void Delete(EntityClass entity)
+        public void Update(TEntity entity)
         {
-            _dbSet.Remove(entity);
+            Context.Entry(entity).State = EntityState.Modified;
         }
-        
+
+        public void Delete(TEntity entity)
+        {
+            DbSet.Remove(entity);
+        }
     }
 }

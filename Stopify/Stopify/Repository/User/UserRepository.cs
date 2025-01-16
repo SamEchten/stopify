@@ -3,40 +3,35 @@ using UserEntity = Stopify.Entity.User.User;
 
 namespace Stopify.Repository.User
 {
-    public class UserRepository : IRepository<UserEntity>
+    public class UserRepository : EntityRepository<UserEntity>
     {
-        private readonly DbContext _context;
-        private readonly DbSet<UserEntity> _dbSet;
-
-        public UserRepository(DbContext context)
+        public UserRepository(ApplicationDbContext context): base(context)
         {
-            _context = context;
-            _dbSet = context.Set<UserEntity>();
         }
         
         public UserEntity? GetById(int id)
         {
-            return _dbSet.Find(id);
+            return DbSet.Find(id);
         }
 
         public IEnumerable<UserEntity> GetAll()
         {
-            return _dbSet.ToList();
+            return DbSet.ToList();
         }
 
         public void Add(UserEntity entity)
         {
-            _dbSet.Add(entity);
+            DbSet.Add(entity);
         }
 
         public void Update(UserEntity entity)
         {
-            _context.Entry(entity).State = EntityState.Modified;
+            Context.Entry(entity).State = EntityState.Modified;
         }
 
         public void Delete(UserEntity entity)
         {
-            _dbSet.Remove(entity);
+            DbSet.Remove(entity);
         }
         
     }
