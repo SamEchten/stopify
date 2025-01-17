@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  stopify:
+    image: stopify-dev  
+    container_name: stopify-server
+    build:
+      context: ../server
+      dockerfile: Stopify/Dockerfile
+    ports:
+      - "5000:80" 
+      - "5232:9229"
+    volumes:
+      - ../server/Stopify:/app
+    networks:
+    - stopify_network
+    working_dir: /app
+    environment:
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+      - ASPNETCORE_ENVIRONMENT=Development
+    command: ["dotnet", "watch", "run", "--no-launch-profile", "--urls", "http://0.0.0.0:80"]
+
+  mysql:
+    image: mariadb:10.4.32 
+    container_name: mysql-db
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MYSQL_DATABASE: stopify
+      MYSQL_USER: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - stopify_network
+
+volumes:
+  mysql-data:
+
+networks:
+  stopify_network:
+    driver: bridge

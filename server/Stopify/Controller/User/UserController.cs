@@ -21,10 +21,11 @@ public class UserController(UserRepository userRepository, UserService userServi
         return user == null ? NotFound() : Ok(user);
     }
 
-    [Authorize]
+    
     [HttpGet( Name = "GetAllUsers")]
     public ActionResult<IEnumerable<UserEntity>> GetAll()
     {
+        
         var users = userRepository.GetAll();
 
         return Ok(users);
