@@ -32,5 +32,4 @@ public class UserService(UserRepository userRepository, HashingService hashingSe
     {
         return userRepository.GetById(id) != null;
     }
-    
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Stopify.Attribute.Auth;
 using Stopify.Repository.User;
 using Stopify.Service.User;
 using UserEntity = Stopify.Entity.User.User;
@@ -6,17 +8,20 @@ using UserEntity = Stopify.Entity.User.User;
 namespace Stopify.Controller.User;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/users")]
 public class UserController(UserRepository userRepository, UserService userService) : ControllerBase
 {
-    [HttpGet("{id:int}", Name = "GetUser")]
-    public ActionResult<UserEntity> Get(int id)
+    [Authorize]
+    [AuthorizeUser]
+    [HttpGet("{userId:int}", Name = "GetUser")]
+    public ActionResult<UserEntity> Get(int userId)
     {
-        var user = userRepository.GetById(id);
+        var user = userRepository.GetById(userId);
         
         return user == null ? NotFound() : Ok(user);
     }
 
+    [Authorize]
     [HttpGet( Name = "GetAllUsers")]
     public ActionResult<IEnumerable<UserEntity>> GetAll()
     {
@@ -25,6 +30,7 @@ public class UserController(UserRepository userRepository, UserService userServi
         return Ok(users);
     }
 
+    [AllowAnonymous]
     [HttpPost( Name = "CreateUser")]
     public ActionResult Create(UserEntity user)
     {
@@ -33,28 +39,32 @@ public class UserController(UserRepository userRepository, UserService userServi
         return Created();
     }
     
-    [HttpPut("{id:int}")]
-    public ActionResult Update(int id, [FromBody] UserEntity user)
+    [Authorize]
+    [AuthorizeUser]
+    [HttpPut("{userId:int}")]
+    public ActionResult Update(int userId, [FromBody] UserEntity user)
     {
-        if (!userService.UserExists((id)))
+        if (!userService.UserExists((userId)))
         {
-            return NotFound(new { message = $"User with ID {id} not found." });
+            return NotFound(new { message = $"User with ID {userId} not found." });
         }
         
-        var updatedUser = userService.UpdateUser(id, user);
+        var updatedUser = userService.UpdateUser(userId, user);
 
         return Ok(updatedUser);
     }
 
-    [HttpDelete("{id:int}")]
-    public ActionResult Delete(int id)
+    [Authorize]
+    [AuthorizeUser]
+    [HttpDelete("{userId:int}")]
+    public ActionResult Delete(int userId)
     {
-        if (!userService.UserExists((id)))
+        if (!userService.UserExists((userId)))
         {
-            return NotFound(new { message = $"User with ID {id} not found." });
+            return NotFound(new { message = $"User with ID {userId} not found." });
         }
         
-        userRepository.Delete(id);
+        userRepository.Delete(userId);
 
         return Ok();
     }
