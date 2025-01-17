@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Stopify.Exception;
 
 namespace Stopify.Middleware.Exception;
 
@@ -11,14 +12,14 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
         
         logger.LogError(exception, "An unhandled exception occurred.");
 
-        if (exception is HttpRequestException)
+        if (exception is HttpException httpException)
         {
             context.Result = new ObjectResult(new
             {
-                message = exception.Message
+                message = httpException.Message
             })
             {
-                StatusCode = 400
+                StatusCode = httpException.StatusCode
             };
                 
             return;

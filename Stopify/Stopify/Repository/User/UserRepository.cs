@@ -1,18 +1,22 @@
-﻿using UserEntity = Stopify.Entity.User.User;
+﻿using Stopify.Entity.User.DTO;
+using UserEntity = Stopify.Entity.User.User;
 
 namespace Stopify.Repository.User;
 
 public class UserRepository(ApplicationDbContext context) : EntityRepository<UserEntity>(context)
 {
-    public new void Add(UserEntity user)
+    public new IEnumerable<GetAllUsersDTO> GetAll()
     {
-        DbSet.Add(user);
-        
-        Context.SaveChanges();
+        return DbSet.Select(user => new GetAllUsersDTO(user.Id, user.Username)).ToList();
     }
-
+    
     public UserEntity? GetByEmail(string email)
     {
-        return DbSet.FirstOrDefault(u => u.Email == email);
+        return DbSet.FirstOrDefault(user => user.Email == email);
+    }
+
+    public UserEntity? GetByUsername(string username)
+    {
+        return DbSet.FirstOrDefault(user => user.Username == username);
     }
 }

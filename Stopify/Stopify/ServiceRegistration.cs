@@ -6,10 +6,15 @@ namespace Stopify;
 
 public static class ServiceRegistration
 {
-    public static void RegisterServices(IServiceCollection services, Assembly assembly)
+    public static void RegisterServices(WebApplicationBuilder builder, Assembly assembly)
     {
+        var services = builder.Services;
+        
         // Register DB Context
         services.AddScoped<ApplicationDbContext>();
+        
+        // Register App Settings
+        services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
         // Auto Register Repositories
         var repositoryTypes = assembly.GetTypes()
@@ -27,6 +32,15 @@ public static class ServiceRegistration
         foreach (var serviceType in serviceTypes)
         {
             services.AddScoped(serviceType);
+        }
+        
+        // Auto Register Factories
+        var factoryTypes = assembly.GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(IFactory).IsAssignableFrom(type));
+
+        foreach (var factoryType in factoryTypes)
+        {
+            services.AddScoped(factoryType);
         }
     }
 }
