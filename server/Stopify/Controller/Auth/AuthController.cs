@@ -15,7 +15,8 @@ public class AuthController(AuthService authService): ControllerBase
     [HttpPost("login", Name = "Login")]
     public ActionResult Login([FromBody] LoginRequest request)
     {
-        var user = authService.Login(request.Username, request.Password);
+        var user = authService.Login(request.Username, request.Email, request.Password);
+        
         if (user == null) return BadRequest();
         
         var accessToken = authService.GenerateAccessToken(user.Id);
