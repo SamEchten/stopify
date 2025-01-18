@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Stopify.Entity.Auth;
-using Stopify.Entity.User;
 using System.Text.RegularExpressions;
+using Stopify.Entities.Auth;
+using Stopify.Entities.Users;
 
 namespace Stopify;
 public partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
