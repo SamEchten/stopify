@@ -22,7 +22,7 @@ services:
 
   mysql:
     image: mariadb:10.4.32 
-    container_name: mysql-db
+    container_name: stopify-db
     environment:
       MARIADB_ROOT_PASSWORD: root
       MYSQL_DATABASE: stopify

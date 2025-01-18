@@ -16,7 +16,7 @@ public class AuthController(AuthService authService): ControllerBase
     {
         var user = authService.Login(request.Username, request.Email, request.Password);
 
-        if (user == null) return BadRequest();
+        if (user == null) return Unauthorized();
 
         var accessToken = authService.GenerateAccessToken(user.Id);
         var refreshToken = authService.FindOrGenerateRefreshToken(user);
