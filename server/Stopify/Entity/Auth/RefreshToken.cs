@@ -9,8 +9,8 @@ public class RefreshToken: Entity
     [MaxLength(255)]
     public required string Token { get; init; }
 
-    [ForeignKey("UserId")]
-    public required UserEntity User { get; set; }
+    [ForeignKey("user_id")]
+    public required UserEntity User { get; init; }
 
     public required DateTime ExpiresAt { get; init; }
 
