@@ -1,0 +1,18 @@
+﻿# .editorconfig settings to enforce explicit types instead of var.
+
+root = true
+
+[*.cs]
+
+# Disable var usage for built-in types and elsewhere
+csharp_style_var_for_built_in_types = false
+csharp_style_var_elsewhere = false
+
+# Enable Roslynator rule for var usage (RCS1026)
+roslynator_diagnostic.RCS1026.severity = error
+
+# Disable the rule for adding default constructors
+roslynator_diagnostic.RCS1061.severity = none
+
+# Disable rule that might be changing constructor behavior (if applicable)
+roslynator_diagnostic.RCS1063.severity = none
