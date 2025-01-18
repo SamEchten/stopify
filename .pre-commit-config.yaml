@@ -3,6 +3,6 @@ repos:
     hooks:
       - id: roslynator-analyze
         name: Run Roslynator Analyze
-        entry: roslynator analyze
+        entry: roslynator analyze --all-files
         language: system
-        files: \.cs$
+        files: .*\.cs$
