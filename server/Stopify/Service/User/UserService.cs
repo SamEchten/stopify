@@ -12,12 +12,12 @@ public class UserService(UserRepository userRepository, HashingService hashingSe
         {
             throw new UserAlreadyExistsException();
         }
-        
+
         user.CreatedAt = DateTime.Now;
         user.UpdatedAt = DateTime.Now;
-        
+
         user.Password = hashingService.HashPassword(user.Password);
-        
+
         userRepository.Add(user);
     }
 

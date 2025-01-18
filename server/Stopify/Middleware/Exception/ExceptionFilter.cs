@@ -9,7 +9,7 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
     public void OnException(ExceptionContext context)
     {
         var exception = context.Exception;
-        
+
         logger.LogError(exception, "An unhandled exception occurred.");
 
         if (exception is HttpException httpException)
@@ -21,7 +21,7 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
             {
                 StatusCode = httpException.StatusCode
             };
-                
+
             return;
         }
 
@@ -34,5 +34,3 @@ public class ExceptionFilter(ILogger<ExceptionFilter> logger) : IExceptionFilter
         };
     }
 }
-
-

@@ -19,7 +19,7 @@ builder.Services.AddControllers(options => {
 ServiceRegistration.RegisterServices(builder, Assembly.GetExecutingAssembly());
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"), 
+    options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
         new MySqlServerVersion(new Version(10, 4, 32))));
 
 var key = builder.Configuration.GetSection("AppSettings:Key").Value ?? throw new Exception("No key provided in appsettings");

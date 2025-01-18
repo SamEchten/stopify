@@ -5,7 +5,6 @@ namespace Stopify.Service.Auth;
 
 public class RefreshTokenFactory: IFactory
 {
-
     public RefreshToken Build(string token, UserEntity user)
     {
         return new RefreshToken
@@ -16,5 +15,4 @@ public class RefreshTokenFactory: IFactory
             ExpiresAt = DateTime.Now.AddDays(7),
         };
     }
-    
 }

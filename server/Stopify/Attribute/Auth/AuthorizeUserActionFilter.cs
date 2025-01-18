@@ -10,17 +10,20 @@ public class AuthorizeUserActionFilter : IActionFilter
     {
         if (!context.ActionDescriptor.EndpointMetadata
                 .OfType<AuthorizeUserAttribute>()
-                .Any()) return;
-        
+                .Any())
+        {
+            return;
+        }
+
         var routeData = context.RouteData.Values;
-            
+
         if (!routeData.TryGetValue("userId", out var value)) return;
-            
+
         var routeUserId = value?.ToString();
         var tokenUserId = context.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         if (routeUserId == null || tokenUserId == null || routeUserId == tokenUserId) return;
-                
+
         context.HttpContext.Response.StatusCode = 403;
         context.HttpContext.Response.ContentType = "application/json";
 

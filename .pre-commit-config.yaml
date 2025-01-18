@@ -1,0 +1,7 @@
+repos:
+  - repo: local
+    hooks:
+      - id: roslynator-analyze-server
+        name: Run Roslynator Analyze
+        entry: roslynator analyze ./server/Stopify/Stopify.csproj --include "**/*.cs"
+        language: system
