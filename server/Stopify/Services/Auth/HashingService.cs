@@ -2,7 +2,7 @@
 using System.Text;
 using Microsoft.Extensions.Options;
 
-namespace Stopify.Services.Users;
+namespace Stopify.Services.Auth;
 
 public class HashingService(IOptions<AppSettings> appSettings): IService
 {

@@ -17,5 +17,6 @@ EXPOSE 80 443 9229
 ENV ASPNETCORE_ENVIRONMENT=Development
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER=1
+ENV DOTNET_WATCH_RESTART_ON_RUDE_EDIT=true
 
 ENTRYPOINT ["dotnet", "watch", "run", "--no-launch-profile", "--no-prompt", "--urls", "http://0.0.0.0:80"]

@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using Stopify.Entities.Users;
+﻿using Stopify.Entities.Users;
+using Stopify.Services.Auth;
 
 namespace Stopify.Services.Users;
 

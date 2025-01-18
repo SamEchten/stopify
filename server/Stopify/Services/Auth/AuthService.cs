@@ -7,7 +7,6 @@ using Stopify.Entities.Auth;
 using Stopify.Entities.Users;
 using Stopify.Repositories.Auth;
 using Stopify.Repositories.Users;
-using Stopify.Services.Users;
 
 namespace Stopify.Services.Auth;
 
