@@ -20,11 +20,11 @@ public class AuthService(
     ) : IService
 {
     public UserEntity? Login(string? username, string? email, string password)
-    { 
+    {
         var user = username != null
             ? userRepository.GetByUsername(username)
             : userRepository.GetByEmail(email!);
-        
+
         if (user == null)
         {
             return null;
