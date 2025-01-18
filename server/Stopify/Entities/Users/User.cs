@@ -7,11 +7,11 @@ namespace Stopify.Entities.Users;
 public class User: Entity
 {
     [MaxLength(20)]
-    public required string Username { get; init; }
+    public required string Username { get; set; }
 
     [EmailAddress]
     [MaxLength(100)]
-    public required string Email { get; init; }
+    public required string Email { get; set; }
 
     [MaxLength(255)]
     public required string Password { get; set; }

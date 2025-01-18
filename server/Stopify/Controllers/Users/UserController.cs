@@ -2,10 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Stopify.Attribute.Auth;
 using Stopify.Repositories.Users;
+using Stopify.Requests.Users;
 using Stopify.Services.Users;
 using UserEntity = Stopify.Entities.Users.User;
 
-namespace Stopify.Controllers.User;
+namespace Stopify.Controllers.Users;
 
 [ApiController]
 [Route("api/users")]
@@ -31,9 +32,9 @@ public class UserController(UserRepository userRepository, UserService userServi
 
     [AllowAnonymous]
     [HttpPost( Name = "CreateUser")]
-    public ActionResult Create(UserEntity user)
+    public ActionResult Create([FromBody] CreateUserRequest request)
     {
-        userService.AddUser(user);
+        userService.AddUser(request.Username, request.Email, request.Password);
 
         return Created();
     }
@@ -41,14 +42,14 @@ public class UserController(UserRepository userRepository, UserService userServi
     [Authorize]
     [AuthorizeUser]
     [HttpPut("{userId:int}")]
-    public ActionResult Update(int userId, [FromBody] UserEntity user)
+    public ActionResult Update(int userId, [FromBody] UpdateUserRequest request)
     {
         if (!userService.UserExists(userId))
         {
             return NotFound(new { message = $"User with ID {userId} not found." });
         }
 
-        var updatedUser = userService.UpdateUser(userId, user);
+        var updatedUser = userService.UpdateUser(userId, request.Username, request.Email);
 
         return Ok(updatedUser);
     }

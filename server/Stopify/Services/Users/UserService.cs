@@ -4,28 +4,28 @@ using Stopify.Entities.Users;
 
 namespace Stopify.Services.Users;
 
-public class UserService(UserRepository userRepository, HashingService hashingService) : IService
+public class UserService(UserRepository userRepository, UserFactory userFactory) : IService
 {
-    public void AddUser(User user)
+    public void AddUser(string username, string email, string password)
     {
-        if (userRepository.GetByEmail(user.Email) != null)
+        if (userRepository.GetByEmail(email) != null)
         {
             throw new UserAlreadyExistsException();
         }
 
-        user.CreatedAt = DateTime.Now;
-        user.UpdatedAt = DateTime.Now;
-
-        user.Password = hashingService.HashPassword(user.Password);
+        var user = userFactory.Build(username, email, password);
 
         userRepository.Add(user);
     }
 
-    public User UpdateUser(int id, User user)
+    public User UpdateUser(int id, string? username, string? email)
     {
-        user.Password = hashingService.HashPassword(user.Password);
+        var user = userRepository.GetById(id)!;
 
-        return userRepository.Update(id, user);
+        if (username != null) user.Username = username;
+        if (email != null) user.Email = email;
+
+        return userRepository.Update(user);
     }
 
     public bool UserExists(int id)
