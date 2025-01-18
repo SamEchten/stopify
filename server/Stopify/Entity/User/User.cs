@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Stopify.Entity.User;
@@ -8,16 +8,16 @@ namespace Stopify.Entity.User;
 public class User: Entity
 {
     [MaxLength(20)]
-    public required string Username { get; set; }
+    public required string Username { get; init; }
 
     [EmailAddress]
     [MaxLength(100)]
-    public required string Email { get; set; }
+    public required string Email { get; init; }
 
     [MaxLength(255)]
     public required string Password { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; }
 }

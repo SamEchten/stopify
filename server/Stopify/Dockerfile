@@ -18,4 +18,5 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 
 ENV DOTNET_USE_POLLING_FILE_WATCHER=1
 
-ENTRYPOINT ["dotnet", "watch", "run", "--no-launch-profile", "--no-restore", "--no-prompt", "--urls", "http://0.0.0.0:80"]
+
+ENTRYPOINT ["dotnet", "watch", "run", "--no-launch-profile", "--no-prompt", "--urls", "http://0.0.0.0:80"]
