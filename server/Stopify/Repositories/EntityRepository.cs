@@ -23,9 +23,9 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
         Context.SaveChanges();
     }
 
-    public TEntity Update(int id, TEntity entity)
+    public TEntity Update(TEntity entity)
     {
-        var existingEntity = DbSet.Find(id)!;
+        var existingEntity = DbSet.Find(entity.Id)!;
 
         foreach (var property in Context.Entry(existingEntity).Properties)
         {

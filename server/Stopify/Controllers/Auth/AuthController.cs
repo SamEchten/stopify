@@ -28,7 +28,7 @@ public class AuthController(AuthService authService): ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("refresh-token", Name="RefreshToken")]
+    [HttpGet("refresh-token", Name="RefreshToken")]
     public ActionResult RefreshToken()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
