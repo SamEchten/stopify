@@ -5,7 +5,6 @@ namespace Stopify.Repository.Auth;
 
 public class RefreshTokenRepository(ApplicationDbContext context) : EntityRepository<RefreshToken>(context)
 {
-
     public RefreshToken? GetByUser(UserEntity user)
     {
         return DbSet.FirstOrDefault(rt => rt.User == user);
@@ -15,5 +14,4 @@ public class RefreshTokenRepository(ApplicationDbContext context) : EntityReposi
     {
         return DbSet.FirstOrDefault(rt => rt.Token == token);
     }
-    
 }

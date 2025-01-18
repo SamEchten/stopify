@@ -12,8 +12,8 @@ using UserEntity = Stopify.Entity.User.User;
 namespace Stopify.Service.Auth;
 
 public class AuthService(
-    IOptions<AppSettings> appSettings, 
-    UserRepository userRepository, 
+    IOptions<AppSettings> appSettings,
+    UserRepository userRepository,
     HashingService hashingService,
     RefreshTokenRepository refreshTokenRepository,
     RefreshTokenFactory refreshTokenFactory
@@ -29,7 +29,7 @@ public class AuthService(
 
         return user.Password == hashingService.HashPassword(password) ? user : null;
     }
-    
+
     public string GenerateAccessToken(int userId, int expireMinutes = 30)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -55,7 +55,7 @@ public class AuthService(
         var token = Guid.NewGuid().ToString();
 
         var refreshToken = refreshTokenFactory.Build(token, user);
-        
+
         refreshTokenRepository.Add(refreshToken);
 
         return refreshToken;
@@ -66,14 +66,14 @@ public class AuthService(
         var existingToken = refreshTokenRepository.GetByUser(user);
 
         if (existingToken == null || existingToken.ExpiresAt < DateTime.UtcNow) return GenerateRefreshToken(user);
-        
+
         return existingToken;
     }
 
     public bool ValidateRefreshToken(string token)
     {
         var existingToken = refreshTokenRepository.GetByToken(token);
-        
+
         return existingToken != null && existingToken.ExpiresAt >= DateTime.UtcNow;
     }
 
@@ -82,8 +82,7 @@ public class AuthService(
         var existingToken = refreshTokenRepository.GetByToken(token);
 
         if (existingToken == null) return null;
-        
+
         return existingToken.ExpiresAt < DateTime.UtcNow ? GenerateRefreshToken(existingToken.User) : existingToken;
     }
-    
 }

@@ -9,10 +9,10 @@ public static class ServiceRegistration
     public static void RegisterServices(WebApplicationBuilder builder, Assembly assembly)
     {
         var services = builder.Services;
-        
+
         // Register DB Context
         services.AddScoped<ApplicationDbContext>();
-        
+
         // Register App Settings
         services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 
@@ -33,7 +33,7 @@ public static class ServiceRegistration
         {
             services.AddScoped(serviceType);
         }
-        
+
         // Auto Register Factories
         var factoryTypes = assembly.GetTypes()
             .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(IFactory).IsAssignableFrom(type));

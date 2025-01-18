@@ -9,7 +9,7 @@ public class UserRepository(ApplicationDbContext context) : EntityRepository<Use
     {
         return DbSet.Select(user => new GetAllUsersDTO(user.Id, user.Username)).ToList();
     }
-    
+
     public UserEntity? GetByEmail(string email)
     {
         return DbSet.FirstOrDefault(user => user.Email == email);

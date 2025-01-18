@@ -9,12 +9,8 @@ public class HashingService(IOptions<AppSettings> appSettings): IService
     public string HashPassword(string password)
     {
         var salt = appSettings.Value.Salt;
-        
-        using var sha256 = SHA256.Create();
         var combined = Encoding.UTF8.GetBytes(password + salt);
-        var hash = sha256.ComputeHash(combined);
+        var hash = SHA256.HashData(combined);
         return Convert.ToBase64String(hash);
     }
-
-    
 }

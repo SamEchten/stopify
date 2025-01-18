@@ -17,15 +17,13 @@ public class UserController(UserRepository userRepository, UserService userServi
     public ActionResult<UserEntity> Get(int userId)
     {
         var user = userRepository.GetById(userId);
-        
+
         return user == null ? NotFound() : Ok(user);
     }
 
-    
     [HttpGet( Name = "GetAllUsers")]
     public ActionResult<IEnumerable<UserEntity>> GetAll()
     {
-        
         var users = userRepository.GetAll();
 
         return Ok(users);
@@ -36,20 +34,20 @@ public class UserController(UserRepository userRepository, UserService userServi
     public ActionResult Create(UserEntity user)
     {
         userService.AddUser(user);
-            
+
         return Created();
     }
-    
+
     [Authorize]
     [AuthorizeUser]
     [HttpPut("{userId:int}")]
     public ActionResult Update(int userId, [FromBody] UserEntity user)
     {
-        if (!userService.UserExists((userId)))
+        if (!userService.UserExists(userId))
         {
             return NotFound(new { message = $"User with ID {userId} not found." });
         }
-        
+
         var updatedUser = userService.UpdateUser(userId, user);
 
         return Ok(updatedUser);
@@ -60,11 +58,11 @@ public class UserController(UserRepository userRepository, UserService userServi
     [HttpDelete("{userId:int}")]
     public ActionResult Delete(int userId)
     {
-        if (!userService.UserExists((userId)))
+        if (!userService.UserExists(userId))
         {
             return NotFound(new { message = $"User with ID {userId} not found." });
         }
-        
+
         userRepository.Delete(userId);
 
         return Ok();

@@ -19,14 +19,14 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
     public void Add(TEntity entity)
     {
         DbSet.Add(entity);
-        
+
         Context.SaveChanges();
     }
 
     public TEntity Update(int id, TEntity entity)
     {
         var existingEntity = DbSet.Find(id)!;
-        
+
         foreach (var property in Context.Entry(existingEntity).Properties)
         {
             if (property.Metadata.IsPrimaryKey())
@@ -37,7 +37,7 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
             var newValue = Context.Entry(entity).Property(property.Metadata.Name).CurrentValue;
             property.CurrentValue = newValue;
         }
-        
+
         Context.SaveChanges();
 
         return existingEntity;
@@ -46,9 +46,9 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
     public void Delete(int id)
     {
         var entity = DbSet.Find(id)!;
-        
+
         DbSet.Remove(entity);
-        
+
         Context.SaveChanges();
     }
 }
