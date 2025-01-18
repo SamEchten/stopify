@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
-using Stopify.Repository;
-using Stopify.Service;
+using Stopify.Repositories;
+using Stopify.Services;
 
 namespace Stopify;
 
