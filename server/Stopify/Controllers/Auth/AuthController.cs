@@ -15,7 +15,8 @@ public class AuthController(AuthService authService): ControllerBase
     public ActionResult Login([FromBody] LoginRequest request)
     {
         Console.WriteLine("testtasda");
-        
+        Console.WriteLine("asd");
+
         
         var user = authService.Login(request.Username, request.Email, request.Password);
 
