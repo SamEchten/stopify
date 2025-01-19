@@ -41,22 +41,22 @@ public class UserController(UserRepository userRepository, UserService userServi
 
     [Authorize]
     [AuthorizeUser]
-    [HttpPut("{userId:int}")]
-    public ActionResult Update(int userId, [FromBody] UpdateUserRequest request)
+    [HttpPut(Name = "UpdateUser")]
+    public ActionResult Update([FromBody] UpdateUserRequest request)
     {
-        if (!userService.UserExists(userId))
+        if (!userService.UserExists(request.UserId))
         {
-            return NotFound(new { message = $"User with ID {userId} not found." });
+            return NotFound(new { message = $"User with ID {request.UserId} not found." });
         }
 
-        var updatedUser = userService.UpdateUser(userId, request.Username, request.Email);
+        var updatedUser = userService.UpdateUser(request.UserId, request.Username, request.Email);
 
         return Ok(updatedUser);
     }
 
     [Authorize]
     [AuthorizeUser]
-    [HttpDelete("{userId:int}")]
+    [HttpDelete("{userId:int}", Name = "DeleteUser")]
     public ActionResult Delete(int userId)
     {
         if (!userService.UserExists(userId))
