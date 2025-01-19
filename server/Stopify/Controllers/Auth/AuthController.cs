@@ -16,6 +16,7 @@ public class AuthController(AuthService authService): ControllerBase
     {
         Console.WriteLine("testtasda");
         
+        
         var user = authService.Login(request.Username, request.Email, request.Password);
 
         if (user == null) return Unauthorized();
