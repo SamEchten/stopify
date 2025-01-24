@@ -13,10 +13,12 @@ public class User: Entity
     [MaxLength(100)]
     public required string Email { get; set; }
 
+    public required ICollection<UserRole> Roles { get; init; }
+
     [MaxLength(255)]
-    public required string Password { get; set; }
+    public required string Password { get; init; }
 
-    public required DateTime CreatedAt { get; set; }
+    public required DateTime CreatedAt { get; init; }
 
-    public required DateTime UpdatedAt { get; set; }
+    public required DateTime UpdatedAt { get; init; }
 }

@@ -13,7 +13,7 @@ public class UserService(UserRepository userRepository, UserFactory userFactory)
             throw new UserAlreadyExistsException();
         }
 
-        var user = userFactory.Build(username, email, password);
+        var user = userFactory.Create(username, email, password);
 
         userRepository.Add(user);
     }

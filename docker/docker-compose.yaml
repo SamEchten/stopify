@@ -11,14 +11,13 @@ services:
       - "5000:8080" 
       - "5232:9229"
     volumes:
-      - ../server/Stopify:/app
+      - ../server/Stopify/src:/app/Stopify/src
     networks:
     - stopify_network
-    working_dir: /app
+    working_dir: /app/Stopify
     environment:
       - DOTNET_USE_POLLING_FILE_WATCHER=1
       - ASPNETCORE_ENVIRONMENT=Development
-    command: ["dotnet", "watch", "run", "--no-launch-profile", "--urls", "http://0.0.0.0:8080"]
 
   mysql:
     image: mariadb:10.4.32 
