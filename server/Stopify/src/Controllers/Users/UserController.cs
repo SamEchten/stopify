@@ -18,10 +18,11 @@ public class UserController(UserRepository userRepository, UserService userServi
     public ActionResult<UserEntity> Get(int userId)
     {
         var user = userRepository.GetById(userId);
-
+        
         return user == null ? NotFound() : Ok(user);
     }
 
+    [AllowAnonymous]
     [HttpGet( Name = "GetAllUsers")]
     public ActionResult<IEnumerable<UserEntity>> GetAll()
     {

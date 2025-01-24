@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Stopify;
 
@@ -11,9 +12,11 @@ using Stopify;
 namespace Stopify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250124145807_UserMigration")]
+    partial class UserMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace Stopify.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("Stopify.Entity.Auth.RefreshToken", b =>
+            modelBuilder.Entity("Stopify.Entities.Auth.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -56,7 +59,7 @@ namespace Stopify.Migrations
                     b.ToTable("refresh_tokens");
                 });
 
-            modelBuilder.Entity("Stopify.Entity.User.User", b =>
+            modelBuilder.Entity("Stopify.Entities.Users.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -99,15 +102,67 @@ namespace Stopify.Migrations
                     b.ToTable("users");
                 });
 
-            modelBuilder.Entity("Stopify.Entity.Auth.RefreshToken", b =>
+            modelBuilder.Entity("Stopify.Entities.Users.UserRole", b =>
                 {
-                    b.HasOne("Stopify.Entity.User.User", "User")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("user_roles");
+                });
+
+            modelBuilder.Entity("UserUserRole", b =>
+                {
+                    b.Property<int>("RolesId")
+                        .HasColumnType("int")
+                        .HasColumnName("roles_id");
+
+                    b.Property<int>("UsersId")
+                        .HasColumnType("int")
+                        .HasColumnName("users_id");
+
+                    b.HasKey("RolesId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("user_user_role");
+                });
+
+            modelBuilder.Entity("Stopify.Entities.Auth.RefreshToken", b =>
+                {
+                    b.HasOne("Stopify.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("user_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserUserRole", b =>
+                {
+                    b.HasOne("Stopify.Entities.Users.UserRole", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Stopify.Entities.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
