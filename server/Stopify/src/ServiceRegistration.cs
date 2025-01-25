@@ -13,15 +13,6 @@ public static class ServiceRegistration
         // Register DB Context
         services.AddScoped<ApplicationDbContext>();
 
-        // Auto Register Repositories
-        var dbContextTypes = assembly.GetTypes()
-            .Where(type => type is { IsClass: true, IsAbstract: false } && type.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IRepository<>)));
-
-        foreach (var dbContextType in dbContextTypes)
-        {
-            services.AddScoped(dbContextType);
-        }
-
         // Register App Settings
         services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
 

@@ -8,6 +8,6 @@ public class UserRoleRepository(ApplicationDbContext context) : EntityRepository
 {
     public UserRole? getByRole(Role role)
     {
-        return context.UserRoles.FirstOrDefault(e => e.Name == role.ToString());
+        return Context.UserRoles.FirstOrDefault(e => e.Name == role.ToString());
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Stopify.Enum.Users;
 
 namespace Stopify.Entities.Users;
 
@@ -7,18 +9,29 @@ namespace Stopify.Entities.Users;
 public class User: Entity
 {
     [MaxLength(20)]
-    public required string Username { get; set; }
+    public string Username { get; set; }
 
     [EmailAddress]
     [MaxLength(100)]
-    public required string Email { get; set; }
+    public string Email { get; set; }
 
-    public required ICollection<UserRole> Roles { get; init; }
+    public ICollection<UserRole> Roles { get; init; } = new List<UserRole>();
 
     [MaxLength(255)]
-    public required string Password { get; init; }
+    [JsonIgnore]
+    public string Password { get; set; }
 
-    public required DateTime CreatedAt { get; init; }
+    [JsonIgnore]
+    public DateTime CreatedAt { get; set; }
 
-    public required DateTime UpdatedAt { get; init; }
+    [JsonIgnore]
+    public DateTime UpdatedAt { get; set; }
+
+    public void AddRole(UserRole role)
+    {
+        if (Roles.All(r => r.Name != role.Name)) // Check if role with same name doesn't exist
+        {
+            Roles.Add(role);
+        }
+    }
 }

@@ -6,7 +6,7 @@ namespace Stopify.Services.Users;
 
 public class UserService(UserRepository userRepository, UserFactory userFactory) : IService
 {
-    public void AddUser(string username, string email, string password)
+    public User CreateUser(string username, string email, string password)
     {
         if (userRepository.GetByEmail(email) != null)
         {
@@ -16,6 +16,8 @@ public class UserService(UserRepository userRepository, UserFactory userFactory)
         var user = userFactory.Create(username, email, password);
 
         userRepository.Add(user);
+
+        return user;
     }
 
     public User UpdateUser(int id, string? username, string? email)

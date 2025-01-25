@@ -12,6 +12,7 @@ public partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext>
     public required DbSet<User> Users { get; set; }
     public required DbSet<RefreshToken> RefreshTokens { get; set; }
     public required DbSet<UserRole> UserRoles { get; set; }
+    public required DbSet<Artist> Artists { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
