@@ -26,4 +26,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="src\Exceptions\Artists\" />
+  </ItemGroup>
+
 </Project>

@@ -1,16 +1,16 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
-WORKDIR /app/Stopify
+WORKDIR /app
 
 RUN dotnet tool install --global dotnet-ef
 
 COPY Stopify/*.csproj ./
 
-RUN dotnet restore --no-cache
-RUN dotnet tool restore
-
 ENV PATH="$PATH:/root/.dotnet/tools"
 
 COPY . ./
+
+RUN dotnet restore --no-cache
+RUN dotnet tool restore
 
 EXPOSE 80 443 9229
 
