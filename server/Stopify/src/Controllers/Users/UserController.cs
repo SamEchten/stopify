@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stopify.Attribute.Auth;
+using Stopify.Entities.Users.DTO;
 using Stopify.Repositories.Users;
 using Stopify.Requests.Users;
 using Stopify.Services.Users;
@@ -18,13 +19,13 @@ public class UserController(UserRepository userRepository, UserService userServi
     public ActionResult<UserEntity> Get(int userId)
     {
         var user = userRepository.GetById(userId);
-        
+
         return user == null ? NotFound() : Ok(user);
     }
 
     [AllowAnonymous]
     [HttpGet( Name = "GetAllUsers")]
-    public ActionResult<IEnumerable<UserEntity>> GetAll()
+    public ActionResult<ICollection<GetAllUsersDTO>> GetAll()
     {
         var users = userRepository.GetAll();
 
@@ -33,11 +34,11 @@ public class UserController(UserRepository userRepository, UserService userServi
 
     [AllowAnonymous]
     [HttpPost( Name = "CreateUser")]
-    public ActionResult Create([FromBody] CreateUserRequest request)
+    public ActionResult<UserEntity> Create([FromBody] CreateUserRequest request)
     {
-        userService.AddUser(request.Username, request.Email, request.Password);
+        var user = userService.CreateUser(request.Username, request.Email, request.Password);
 
-        return Created();
+        return user;
     }
 
     [Authorize]

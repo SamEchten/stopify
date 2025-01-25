@@ -11,7 +11,7 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
         return DbSet.Find(id);
     }
 
-    public IEnumerable<TEntity> GetAll()
+    public ICollection<TEntity> GetAll()
     {
         return DbSet.ToList();
     }

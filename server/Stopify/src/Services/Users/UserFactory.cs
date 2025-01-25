@@ -13,8 +13,8 @@ public class UserFactory(HashingService hashingService, UserRoleRepository roleR
 
         return new User
         {
-            Username = username,
-            Email = email,
+            Username = username.ToLower(),
+            Email = email.ToLower(),
             Roles = [ userRole ],
             Password = hashingService.HashPassword(password),
             CreatedAt = DateTime.Now,

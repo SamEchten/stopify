@@ -3,11 +3,9 @@ WORKDIR /app
 
 RUN dotnet tool install --global dotnet-ef
 
-COPY Stopify/*.csproj ./
+COPY . ./
 
 ENV PATH="$PATH:/root/.dotnet/tools"
-
-COPY . ./
 
 RUN dotnet restore --no-cache
 RUN dotnet tool restore
