@@ -6,6 +6,11 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
     protected readonly ApplicationDbContext Context = context;
     protected readonly DbSet<TEntity> DbSet = context.Set<TEntity>();
 
+    public virtual TEntity? Find(int id)
+    {
+        return DbSet.Find(id);
+    }
+
     public TEntity? GetById(int id)
     {
         return DbSet.Find(id);

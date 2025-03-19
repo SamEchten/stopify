@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Stopify;
 
@@ -11,9 +12,11 @@ using Stopify;
 namespace Stopify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250125161908_SongMigration")]
+    partial class SongMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,23 +40,6 @@ namespace Stopify.Migrations
                     b.HasIndex("SongsId");
 
                     b.ToTable("artist_song");
-                });
-
-            modelBuilder.Entity("PlaylistSong", b =>
-                {
-                    b.Property<int>("PlaylistsId")
-                        .HasColumnType("int")
-                        .HasColumnName("playlists_id");
-
-                    b.Property<int>("SongsId")
-                        .HasColumnType("int")
-                        .HasColumnName("songs_id");
-
-                    b.HasKey("PlaylistsId", "SongsId");
-
-                    b.HasIndex("SongsId");
-
-                    b.ToTable("playlist_song");
                 });
 
             modelBuilder.Entity("Stopify.Entities.Auth.RefreshToken", b =>
@@ -90,32 +76,6 @@ namespace Stopify.Migrations
                     b.ToTable("refresh_tokens");
                 });
 
-            modelBuilder.Entity("Stopify.Entities.Music.Playlist", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)")
-                        .HasColumnName("title");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("playlists");
-                });
-
             modelBuilder.Entity("Stopify.Entities.Music.Song", b =>
                 {
                     b.Property<int>("Id")
@@ -127,8 +87,8 @@ namespace Stopify.Migrations
 
                     b.Property<string>("FileLocation")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)")
                         .HasColumnName("file_location");
 
                     b.Property<string>("Name")
@@ -275,37 +235,11 @@ namespace Stopify.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PlaylistSong", b =>
-                {
-                    b.HasOne("Stopify.Entities.Music.Playlist", null)
-                        .WithMany()
-                        .HasForeignKey("PlaylistsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Stopify.Entities.Music.Song", null)
-                        .WithMany()
-                        .HasForeignKey("SongsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Stopify.Entities.Auth.RefreshToken", b =>
                 {
                     b.HasOne("Stopify.Entities.Users.User", "User")
                         .WithMany()
                         .HasForeignKey("user_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Stopify.Entities.Music.Playlist", b =>
-                {
-                    b.HasOne("Stopify.Entities.Users.User", "User")
-                        .WithMany("Playlists")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -336,11 +270,6 @@ namespace Stopify.Migrations
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Stopify.Entities.Users.User", b =>
-                {
-                    b.Navigation("Playlists");
                 });
 #pragma warning restore 612, 618
         }

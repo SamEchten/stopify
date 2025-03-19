@@ -13,4 +13,20 @@ public class HashingService(IOptions<AppSettings> appSettings): IService
         var hash = SHA256.HashData(combined);
         return Convert.ToBase64String(hash);
     }
+
+    public string GenerateUniqueFileNameHash(IFormFile file)
+    {
+        using var sha256 = SHA256.Create();
+        using var stream = file.OpenReadStream();
+
+        var fileHash = sha256.ComputeHash(stream);
+
+        var salt = Guid.NewGuid().ToString();
+
+        var combined = BitConverter.ToString(fileHash).Replace("-", "").ToLower() + salt;
+
+        var finalHash = sha256.ComputeHash(Encoding.UTF8.GetBytes(combined));
+
+        return BitConverter.ToString(finalHash).Replace("-", "").ToLower() + Path.GetExtension(file.FileName);
+    }
 }
