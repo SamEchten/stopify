@@ -6,6 +6,7 @@ using Stopify.Middleware.Exception;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Stopify.Attribute.Auth;
+using Stopify.Services.Streaming;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddControllers(options => {
     options.Filters.Add<ExceptionFilter>();
     options.Filters.Add<AuthorizeUserActionFilter>();
+    options.Filters.Add<AuthorizeArtistActionFilter>();
 });
 
 ServiceRegistration.RegisterServices(builder, Assembly.GetExecutingAssembly());
@@ -58,8 +60,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseEndpoints(endpoints => endpoints.MapHub<WebRTCHub>("/webrtchub"));
 
 app.Run();

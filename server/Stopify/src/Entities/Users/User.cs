@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Stopify.Entities.Music;
 using Stopify.Enum.Users;
 
 namespace Stopify.Entities.Users;
@@ -26,6 +27,8 @@ public class User: Entity
 
     [JsonIgnore]
     public DateTime UpdatedAt { get; set; }
+
+    public ICollection<Playlist> Playlists { get; init; } = new List<Playlist>();
 
     public void AddRole(UserRole role)
     {

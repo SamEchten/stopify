@@ -42,5 +42,7 @@ public static class ServiceRegistration
         {
             services.AddScoped(factoryType);
         }
+
+        services.AddSignalR();
     }
 }

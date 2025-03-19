@@ -13,6 +13,12 @@ public class ArtistRepository(ApplicationDbContext context) : EntityRepository<A
     public Artist? GetByUser(User user)
     {
         return DbSet
-            .FirstOrDefault(a => a.User.Email == user.Email);
+            .FirstOrDefault(a => a.User.Id == user.Id);
+    }
+
+    public Artist? GetByUserId(int userId)
+    {
+        return DbSet
+            .FirstOrDefault(a => a.User.Id == userId);
     }
 }
