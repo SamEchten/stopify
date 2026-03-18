@@ -1,1 +1,2 @@
-CREATE DATABASE stopify
+CREATE DATABASE IF NOT EXISTS stopify;
+USE stopify;

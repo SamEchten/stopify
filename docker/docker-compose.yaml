@@ -8,7 +8,7 @@ services:
       context: ../server
       dockerfile: Stopify/Dockerfile
     ports:
-      - "5000:8080" 
+      - "8080:8080" 
       - "5232:9229"
     volumes:
       - ../server/Stopify/src:/app/Stopify/src
