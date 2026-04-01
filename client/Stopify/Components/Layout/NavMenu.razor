@@ -10,27 +10,27 @@
 	<nav class="d-flex flex-column gap-4">
 		<div class="col gap-2">
 			<div class="nav-item">
-				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="#">
+				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/">
 					<span class="house-icon"></span> <p>Home</p>
 				</NavLink>
 			</div>
 			<div class="nav-item">
-				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="#">
+				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/playlists">
 					<span class="music-list-icon"></span> Playlists
 				</NavLink>
 			</div>
 			<div class="nav-item">
-				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="#">
+				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/create-playlist">
 					<span class="create-icon"></span> Create playlist
 				</NavLink>
 			</div>
 			<div class="nav-item">
-				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="#">
+				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/join-session">
 					<span class="play-icon"></span> Join session
 				</NavLink>
 			</div>
 			<div class="nav-item">
-				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="#">
+				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/current-session">
 					<span class="persons-icon"></span> Current session
 				</NavLink>
 			</div>
@@ -49,14 +49,18 @@
 		<div class="text-white">
 			<div>
 				<span class="flex">
-					<img/> 
-					<p>Profile</p>
+					<NavLink href="/profile" class="text-white text-decoration-none d-flex flex-row gap-2">
+						<img/> 
+						<p>Profile</p>
+					</NavLink>
 				</span>
 			</div>
 			<div>
 				<span class="flex">
-					<span>test</span> 
-					<p>Log out</p>
+					<NavLink href="/logout" class="text-white text-decoration-none d-flex flex-row gap-2">
+						<span>test</span> 
+						<p>Log out</p>
+					</NavLink>
 				</span>
 			</div>
 		</div>
