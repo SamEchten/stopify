@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Stopify.Repositories;
 using Stopify.Services;
+using Stopify.Services.Session;
 
 namespace Stopify;
 
@@ -44,5 +45,7 @@ public static class ServiceRegistration
         }
 
         services.AddSignalR();
+
+        services.AddSingleton<SessionStore>();
     }
 }

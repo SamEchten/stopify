@@ -12,6 +12,8 @@ services:
       - "5232:9229"
     volumes:
       - ../server/Stopify/src:/app/Stopify/src
+      - ../server/Stopify/wwwroot:/app/Stopify/wwwroot
+      - songs-data:/app/songs
     networks:
     - stopify_network
     working_dir: /app
@@ -36,6 +38,7 @@ services:
 
 volumes:
   mysql-data:
+  songs-data:
 
 networks:
   stopify_network:

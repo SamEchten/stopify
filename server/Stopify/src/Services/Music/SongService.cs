@@ -13,9 +13,9 @@ public class SongService(
     ILogger<SongService> logger
 ) : IService {
     private readonly string _songsLocation = Path.Combine(Directory.GetCurrentDirectory(), "songs");
-    public Song UploadSong(string songName, ICollection<int> artistIds, IFormFile file)
+    public async Task<Song> UploadSong(string songName, ICollection<int> artistIds, IFormFile file)
     {
-        var fileLocation = storage.UploadFile(file, _songsLocation);
+        var fileLocation = await storage.UploadFile(file, _songsLocation);
 
         logger.LogInformation("Uploaded song {songName} to {fileLocation}", songName, fileLocation);
 

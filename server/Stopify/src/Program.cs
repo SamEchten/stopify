@@ -6,6 +6,7 @@ using Stopify.Middleware.Exception;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Stopify.Attribute.Auth;
+using Stopify.Hubs;
 using Stopify.Services.Streaming;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +45,19 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["Stopify-AccessToken"];
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -60,12 +74,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseEndpoints(endpoints => endpoints.MapHub<WebRTCHub>("/webrtchub"));
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<WebRTCHub>("/webrtchub");
+    endpoints.MapHub<SessionHub>("/sessionhub");
+});
 
 app.Run();
