@@ -1,0 +1,45 @@
+.account-toggle {
+    display: flex;
+    background-color: #f1f3f5;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+    width: 100%;
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.toggle-btn.active {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.secondary-button {
+    background-color: transparent !important;
+    color: #1a1a1a !important;
+    border: 1.5px solid #e5e7eb !important;
+}
+
+.secondary-button:hover {
+    background-color: #f9fafb !important;
+}
