@@ -12,7 +12,7 @@ public class StorageService(HashingService hashingService) : IService
 
         var filePath = Path.Combine(folderLocation, fileName);
 
-        using var stream = new FileStream(filePath, FileMode.Create);
+        await using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
 
         await file.CopyToAsync(stream);
 

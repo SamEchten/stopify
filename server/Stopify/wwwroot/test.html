@@ -51,21 +51,6 @@
         <button onclick="login()">Login</button>
     </div>
 
-    <!-- SignalR -->
-    <div class="card">
-        <h2>2. SignalR Hub</h2>
-        <span id="hubStatus" class="status disconnected">Disconnected</span>
-        <br>
-        <button onclick="connectHub()">Connect</button>
-        <button class="danger" onclick="disconnectHub()">Disconnect</button>
-        <br><br>
-        <label>Subscribe to session (after join)</label>
-        <div class="row">
-            <input id="subscribeSessionId" placeholder="session id" />
-            <button onclick="subscribe()">Subscribe</button>
-        </div>
-    </div>
-
     <!-- Sessions -->
     <div class="card">
         <h2>3. Sessions (REST)</h2>
@@ -82,8 +67,10 @@
 
     <!-- Playback -->
     <div class="card">
-        <h2>4. Playback (SignalR — host only)</h2>
-        <label>Song ID</label>
+        <h2>4. Playback</h2>
+        <span id="roleLabel" class="status disconnected">No session</span>
+        <br><br>
+        <label>Song ID (host: set song outside queue)</label>
         <input id="songId" placeholder="e.g. 1" type="number" />
         <button onclick="changeSong()">Set Song</button>
         <br><br>
@@ -95,9 +82,24 @@
         <button class="secondary" onclick="sync()">Sync</button>
     </div>
 
+    <!-- Queue -->
+    <div class="card">
+        <h2>5. Queue</h2>
+        <label>Song ID</label>
+        <div class="row">
+            <input id="queueSongId" placeholder="e.g. 2" type="number" />
+            <button onclick="addToQueue()">Add to Queue</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button class="secondary" onclick="skipPrevious()">&#9664;&#9664; Previous</button>
+            <button class="secondary" onclick="skipNext()">Next &#9654;&#9654;</button>
+        </div>
+        <div id="queueList" style="font-size:12px;color:#888;min-height:20px;">Queue empty</div>
+    </div>
+
     <!-- Audio player -->
     <div class="card">
-        <h2>5. Audio Player</h2>
+        <h2>6. Audio Player</h2>
         <p style="font-size:12px;color:#888;margin-bottom:8px;">Auto-controlled by session events when subscribed.</p>
         <audio id="audio" controls></audio>
     </div>
@@ -114,7 +116,16 @@
 
 <script>
     let connection = null;
+    let isHost = false;
+    let locallyPaused = false;
     const audio = document.getElementById('audio');
+
+    audio.addEventListener('ended', () => {
+        if (isHost) {
+            log('Song ended — advancing queue', 'info');
+            hubInvoke('SongEnded', getSessionId());
+        }
+    });
 
     audio.addEventListener('error', () => {
         const errors = ['', 'ABORTED', 'NETWORK', 'DECODE', 'SRC_NOT_SUPPORTED'];
@@ -165,6 +176,7 @@
 
         connection.on('OnPlay', (position) => {
             log(`OnPlay @ ${position}s`, 'event');
+            if (locallyPaused) { log('Locally paused — ignoring OnPlay. Click Sync to rejoin.', 'info'); return; }
             if (!audio.src || audio.src === window.location.href) {
                 log('No song loaded — call Set Song first', 'error');
                 return;
@@ -192,9 +204,19 @@
 
         connection.on('OnSync', (position) => {
             log(`OnSync @ ${position}s`, 'event');
+            if (locallyPaused) { return; }
             if (Math.abs(audio.currentTime - position) > 1) {
                 audio.currentTime = position;
             }
+        });
+
+        connection.on('OnQueueUpdated', (queue, index) => {
+            log(`Queue updated: [${queue.join(', ')}] index=${index}`, 'event');
+            renderQueue(queue, index);
+        });
+        connection.on('OnQueueEnded', () => {
+            log('Queue ended — no more songs', 'info');
+            renderQueue([], -1);
         });
 
         connection.on('UserJoined', (userId) => log(`UserJoined: ${userId}`, 'event'));
@@ -228,11 +250,14 @@
     }
 
     async function autoSubscribe(sessionId) {
-        if (connection && connection.state === signalR.HubConnectionState.Connected) {
+        if (!connection || connection.state === signalR.HubConnectionState.Disconnected) {
+            await connectHub();
+        }
+        if (connection.state === signalR.HubConnectionState.Connected) {
             await hubInvoke('Subscribe', sessionId);
             log(`Auto-subscribed to session ${sessionId}`, 'info');
         } else {
-            log('Hub not connected — connect to SignalR first, then click Subscribe manually', 'error');
+            log('Could not connect to hub — click Connect manually and then Subscribe', 'error');
         }
     }
 
@@ -250,8 +275,10 @@
         if (res.ok) {
             const data = await res.json();
             document.getElementById('sessionId').value = data.id;
-            document.getElementById('subscribeSessionId').value = data.id;
             document.getElementById('currentSession').textContent = `Active: ${data.id}`;
+            isHost = true;
+            locallyPaused = false;
+            updateRoleLabel();
             log(`Session created: ${data.id}`, 'event');
             log(JSON.stringify(data, null, 2), 'info');
             await autoSubscribe(data.id);
@@ -275,11 +302,14 @@
         if (res.ok) {
             const data = await res.json();
             document.getElementById('currentSession').textContent = `Active: ${data.id}`;
+            isHost = false;
+            locallyPaused = false;
+            updateRoleLabel();
             log(`Joined session: ${id}`, 'event');
             log(JSON.stringify(data, null, 2), 'info');
             if (data.currentSongId) {
                 audio.src = `/api/stream/${data.currentSongId}`;
-                audio.currentTime = data.playbackPosition;
+                audio.currentTime = estimatePosition(data);
             }
             await autoSubscribe(data.id);
         } else {
@@ -294,6 +324,9 @@
             credentials: 'include'
         });
         if (res.ok) {
+            isHost = false;
+            locallyPaused = false;
+            updateRoleLabel();
             document.getElementById('currentSession').textContent = 'No active session';
             log(`Left session: ${id}`, 'event');
         } else {
@@ -319,14 +352,30 @@
     }
 
     async function play() {
-        const position = parseFloat(document.getElementById('position').value) || 0;
-        await hubInvoke('Play', getSessionId(), position);
+        if (isHost) {
+            const position = parseFloat(document.getElementById('position').value) || 0;
+            await hubInvoke('Play', getSessionId(), position);
+        } else {
+            // Resume local playback only
+            audio.play().catch(e => log(`Audio play blocked: ${e.message}`, 'error'));
+            locallyPaused = false;
+            updateRoleLabel();
+            log('Resumed locally', 'info');
+        }
     }
 
     async function pause() {
-        const position = audio.currentTime;
-        document.getElementById('position').value = position.toFixed(1);
-        await hubInvoke('Pause', getSessionId(), position);
+        if (isHost) {
+            const position = audio.currentTime;
+            document.getElementById('position').value = position.toFixed(1);
+            await hubInvoke('Pause', getSessionId(), position);
+        } else {
+            // Pause local playback only — does not affect the session
+            audio.pause();
+            locallyPaused = true;
+            updateRoleLabel();
+            log('Paused locally — session continues. Click Sync to rejoin.', 'info');
+        }
     }
 
     async function seek() {
@@ -335,7 +384,91 @@
     }
 
     async function sync() {
-        await hubInvoke('Sync', getSessionId(), audio.currentTime);
+        if (isHost) {
+            await hubInvoke('Sync', getSessionId(), audio.currentTime);
+        } else {
+            // Fetch current session state and resync local audio
+            const res = await fetch(`/api/sessions/${getSessionId()}`, { credentials: 'include' });
+            if (!res.ok) { log(`Sync failed: ${res.status}`, 'error'); return; }
+            const session = await res.json();
+            locallyPaused = false;
+            updateRoleLabel();
+            const position = estimatePosition(session);
+            audio.currentTime = position;
+            if (session.isPlaying) {
+                audio.play().catch(e => log(`Audio play blocked: ${e.message}`, 'error'));
+            }
+            log(`Synced to position ${position.toFixed(1)}s`, 'event');
+        }
+    }
+
+    // ── Queue ─────────────────────────────────────────────────
+    async function addToQueue() {
+        const songId = parseInt(document.getElementById('queueSongId').value);
+        if (!songId) { log('Enter a valid song ID', 'error'); return; }
+
+        const res = await fetch(`/api/sessions/${getSessionId()}/queue`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ songId }),
+            credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderQueue(data.queue, data.queueIndex);
+            log(`Song ${songId} added to queue`, 'event');
+        } else {
+            log(`Add to queue failed: ${res.status}`, 'error');
+        }
+    }
+
+    async function skipNext() {
+        const res = await fetch(`/api/sessions/${getSessionId()}/next`, {
+            method: 'POST', credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderQueue(data.queue, data.queueIndex);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            log(`Skip next failed: ${err.message ?? res.status}`, 'error');
+        }
+    }
+
+    async function skipPrevious() {
+        const res = await fetch(`/api/sessions/${getSessionId()}/previous`, {
+            method: 'POST', credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderQueue(data.queue, data.queueIndex);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            log(`Skip previous failed: ${err.message ?? res.status}`, 'error');
+        }
+    }
+
+    function renderQueue(queue, index) {
+        const el = document.getElementById('queueList');
+        if (!queue || queue.length === 0) { el.textContent = 'Queue empty'; return; }
+        el.innerHTML = queue.map((songId, i) =>
+            `<div style="padding:2px 0;${i === index ? 'color:#1db954;font-weight:bold;' : ''}">
+                ${i === index ? '▶ ' : `${i + 1}. `}Song ${songId}
+            </div>`
+        ).join('');
+    }
+
+    function estimatePosition(session) {
+        if (session.isPlaying && session.playbackStartedAt) {
+            const elapsed = (Date.now() - new Date(session.playbackStartedAt).getTime()) / 1000;
+            return session.playbackPosition + elapsed;
+        }
+        return session.playbackPosition;
+    }
+
+    function updateRoleLabel() {
+        const label = isHost ? 'Host' : (locallyPaused ? 'Member (locally paused)' : 'Member');
+        document.getElementById('roleLabel').textContent = label;
     }
 
     async function hubInvoke(method, ...args) {

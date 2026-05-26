@@ -37,6 +37,7 @@ public class SessionHub(SessionStore sessionStore) : Hub
         var session = sessionStore.Get(sessionId)!;
         session.IsPlaying = true;
         session.PlaybackPosition = position;
+        session.PlaybackStartedAt = DateTime.UtcNow;
 
         await Clients.Group(sessionId).SendAsync("OnPlay", position);
     }
@@ -48,6 +49,7 @@ public class SessionHub(SessionStore sessionStore) : Hub
         var session = sessionStore.Get(sessionId)!;
         session.IsPlaying = false;
         session.PlaybackPosition = position;
+        session.PlaybackStartedAt = null;
 
         await Clients.Group(sessionId).SendAsync("OnPause", position);
     }
@@ -58,6 +60,7 @@ public class SessionHub(SessionStore sessionStore) : Hub
 
         var session = sessionStore.Get(sessionId)!;
         session.PlaybackPosition = position;
+        session.PlaybackStartedAt = session.IsPlaying ? DateTime.UtcNow : null;
 
         await Clients.Group(sessionId).SendAsync("OnSeek", position);
     }
@@ -70,6 +73,8 @@ public class SessionHub(SessionStore sessionStore) : Hub
         session.CurrentSongId = songId;
         session.PlaybackPosition = 0;
         session.IsPlaying = false;
+        session.PlaybackStartedAt = null;
+        session.QueueIndex = -1;
 
         await Clients.Group(sessionId).SendAsync("OnSongChanged", songId);
     }
@@ -82,6 +87,33 @@ public class SessionHub(SessionStore sessionStore) : Hub
         session.PlaybackPosition = position;
 
         await Clients.OthersInGroup(sessionId).SendAsync("OnSync", position);
+    }
+
+    public async Task SongEnded(string sessionId)
+    {
+        if (!IsHost(sessionId)) return;
+
+        var session = sessionStore.Get(sessionId)!;
+        var nextIndex = session.QueueIndex + 1;
+
+        if (nextIndex < session.Queue.Count)
+        {
+            session.QueueIndex = nextIndex;
+            var nextSongId = session.Queue[nextIndex];
+            session.CurrentSongId = nextSongId;
+            session.PlaybackPosition = 0;
+            session.IsPlaying = true;
+            session.PlaybackStartedAt = DateTime.UtcNow;
+
+            await Clients.Group(sessionId).SendAsync("OnSongChanged", nextSongId);
+            await Clients.Group(sessionId).SendAsync("OnPlay", 0.0, CancellationToken.None);
+        }
+        else
+        {
+            session.IsPlaying = false;
+            session.PlaybackStartedAt = null;
+            await Clients.Group(sessionId).SendAsync("OnQueueEnded");
+        }
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)

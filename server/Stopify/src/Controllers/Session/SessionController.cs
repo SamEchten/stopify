@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Stopify.Hubs;
+using Stopify.Requests.Session;
 using Stopify.Services.Session;
 
 namespace Stopify.Controllers.Session;
@@ -43,6 +44,7 @@ public class SessionController(SessionStore sessionStore, IHubContext<SessionHub
             session.HostUserId,
             session.CurrentSongId,
             session.PlaybackPosition,
+            session.PlaybackStartedAt,
             session.IsPlaying,
             MemberUserIds = session.MemberUserIds.ToList()
         });
@@ -110,5 +112,79 @@ public class SessionController(SessionStore sessionStore, IHubContext<SessionHub
         }
 
         return Ok();
+    }
+
+    [HttpGet("{sessionId}/queue")]
+    public ActionResult GetQueue(string sessionId)
+    {
+        var session = sessionStore.Get(sessionId);
+        if (session == null) return NotFound();
+
+        return Ok(new { session.Queue, session.QueueIndex });
+    }
+
+    [HttpPost("{sessionId}/queue")]
+    public async Task<ActionResult> AddToQueue(string sessionId, [FromBody] AddToQueueRequest request)
+    {
+        var session = sessionStore.Get(sessionId);
+        if (session == null) return NotFound();
+
+        session.Queue.Add(request.SongId);
+
+        await hubContext.Clients.Group(sessionId).SendAsync("OnQueueUpdated", session.Queue, session.QueueIndex);
+
+        return Ok(new { session.Queue, session.QueueIndex });
+    }
+
+    [HttpPost("{sessionId}/next")]
+    public async Task<ActionResult> SkipNext(string sessionId)
+    {
+        var session = sessionStore.Get(sessionId);
+        if (session == null) return NotFound();
+        var userId = GetUserId();
+        if (session.HostUserId != userId)
+            return StatusCode(403, new { message = $"Only the host can do this (host: {session.HostUserId}, you: {userId})" });
+
+        var nextIndex = session.QueueIndex + 1;
+        if (nextIndex >= session.Queue.Count)
+            return BadRequest(new { message = "No next song in queue" });
+
+        session.QueueIndex = nextIndex;
+        var songId = session.Queue[nextIndex];
+        session.CurrentSongId = songId;
+        session.PlaybackPosition = 0;
+        session.IsPlaying = true;
+        session.PlaybackStartedAt = DateTime.UtcNow;
+
+        await hubContext.Clients.Group(sessionId).SendAsync("OnSongChanged", songId);
+        await hubContext.Clients.Group(sessionId).SendAsync("OnPlay", 0.0, CancellationToken.None);
+
+        return Ok(new { session.Queue, session.QueueIndex });
+    }
+
+    [HttpPost("{sessionId}/previous")]
+    public async Task<ActionResult> SkipPrevious(string sessionId)
+    {
+        var session = sessionStore.Get(sessionId);
+        if (session == null) return NotFound();
+        var userId = GetUserId();
+        if (session.HostUserId != userId)
+            return StatusCode(403, new { message = $"Only the host can do this (host: {session.HostUserId}, you: {userId})" });
+
+        var prevIndex = session.QueueIndex - 1;
+        if (prevIndex < 0)
+            return BadRequest(new { message = "No previous song in queue" });
+
+        session.QueueIndex = prevIndex;
+        var songId = session.Queue[prevIndex];
+        session.CurrentSongId = songId;
+        session.PlaybackPosition = 0;
+        session.IsPlaying = true;
+        session.PlaybackStartedAt = DateTime.UtcNow;
+
+        await hubContext.Clients.Group(sessionId).SendAsync("OnSongChanged", songId);
+        await hubContext.Clients.Group(sessionId).SendAsync("OnPlay", 0.0, CancellationToken.None);
+
+        return Ok(new { session.Queue, session.QueueIndex });
     }
 }
