@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stopify Session Tester</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: monospace; background: #1a1a1a; color: #e0e0e0; padding: 20px; }
+        h1 { color: #1db954; margin-bottom: 20px; }
+        h2 { color: #1db954; margin-bottom: 10px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .card { background: #2a2a2a; border: 1px solid #333; border-radius: 8px; padding: 16px; }
+        .card.full { grid-column: 1 / -1; }
+        input, button { font-family: monospace; font-size: 13px; }
+        input { background: #1a1a1a; border: 1px solid #444; color: #e0e0e0; padding: 6px 10px; border-radius: 4px; width: 100%; margin-bottom: 8px; }
+        button { background: #1db954; color: #000; border: none; padding: 7px 14px; border-radius: 4px; cursor: pointer; margin: 3px 3px 3px 0; font-weight: bold; }
+        button:hover { background: #1ed760; }
+        button.danger { background: #e74c3c; color: #fff; }
+        button.danger:hover { background: #c0392b; }
+        button.secondary { background: #444; color: #e0e0e0; }
+        button.secondary:hover { background: #555; }
+        .status { font-size: 12px; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+        .status.connected { background: #1db95433; color: #1db954; }
+        .status.disconnected { background: #e74c3c33; color: #e74c3c; }
+        #log { background: #111; border: 1px solid #333; border-radius: 4px; padding: 10px; height: 300px; overflow-y: auto; font-size: 12px; }
+        .log-entry { margin-bottom: 4px; padding: 2px 0; border-bottom: 1px solid #222; }
+        .log-entry.event { color: #1db954; }
+        .log-entry.error { color: #e74c3c; }
+        .log-entry.info { color: #888; }
+        .log-entry.sent { color: #3498db; }
+        label { font-size: 11px; color: #888; display: block; margin-bottom: 2px; }
+        audio { width: 100%; margin-top: 8px; }
+        .row { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 8px; }
+        .row input { margin-bottom: 0; }
+        .session-id { font-size: 11px; color: #888; word-break: break-all; min-height: 16px; }
+    </style>
+</head>
+<body>
+<h1>Stopify Session Tester</h1>
+
+<div class="grid">
+
+    <!-- Auth -->
+    <div class="card">
+        <h2>1. Login</h2>
+        <label>Username</label>
+        <input id="username" placeholder="username" />
+        <label>Password</label>
+        <input id="password" type="password" placeholder="password" />
+        <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Sessions -->
+    <div class="card">
+        <h2>3. Sessions (REST)</h2>
+        <button onclick="createSession()">Create Session</button>
+        <button class="secondary" onclick="listSessions()">List Sessions</button>
+        <br><br>
+        <label>Session ID</label>
+        <input id="sessionId" placeholder="paste or auto-filled on create" />
+        <button onclick="joinSession()">Join</button>
+        <button class="danger" onclick="leaveSession()">Leave</button>
+        <br>
+        <div class="session-id" id="currentSession">No active session</div>
+    </div>
+
+    <!-- Playback -->
+    <div class="card">
+        <h2>4. Playback</h2>
+        <span id="roleLabel" class="status disconnected">No session</span>
+        <br><br>
+        <label>Song ID (host: set song outside queue)</label>
+        <input id="songId" placeholder="e.g. 1" type="number" />
+        <button onclick="changeSong()">Set Song</button>
+        <br><br>
+        <label>Position (seconds)</label>
+        <input id="position" value="0" type="number" step="0.1" />
+        <button onclick="play()">Play</button>
+        <button onclick="pause()">Pause</button>
+        <button onclick="seek()">Seek</button>
+        <button class="secondary" onclick="sync()">Sync</button>
+    </div>
+
+    <!-- Queue -->
+    <div class="card">
+        <h2>5. Queue</h2>
+        <label>Song ID</label>
+        <div class="row">
+            <input id="queueSongId" placeholder="e.g. 2" type="number" />
+            <button onclick="addToQueue()">Add to Queue</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <button class="secondary" onclick="skipPrevious()">&#9664;&#9664; Previous</button>
+            <button class="secondary" onclick="skipNext()">Next &#9654;&#9654;</button>
+        </div>
+        <div id="queueList" style="font-size:12px;color:#888;min-height:20px;">Queue empty</div>
+    </div>
+
+    <!-- Audio player -->
+    <div class="card">
+        <h2>6. Audio Player</h2>
+        <p style="font-size:12px;color:#888;margin-bottom:8px;">Auto-controlled by session events when subscribed.</p>
+        <audio id="audio" controls></audio>
+    </div>
+
+    <!-- Log -->
+    <div class="card full">
+        <h2>Event Log</h2>
+        <button class="secondary" onclick="clearLog()">Clear</button>
+        <br><br>
+        <div id="log"></div>
+    </div>
+
+</div>
+
+<script>
+    let connection = null;
+    let isHost = false;
+    let locallyPaused = false;
+    const audio = document.getElementById('audio');
+
+    audio.addEventListener('ended', () => {
+        if (isHost) {
+            log('Song ended — advancing queue', 'info');
+            hubInvoke('SongEnded', getSessionId());
+        }
+    });
+
+    audio.addEventListener('error', () => {
+        const errors = ['', 'ABORTED', 'NETWORK', 'DECODE', 'SRC_NOT_SUPPORTED'];
+        log(`Audio error: ${errors[audio.error?.code] ?? 'UNKNOWN'} — check that the song exists and the stream URL is accessible`, 'error');
+    });
+
+    function getSessionId() {
+        return document.getElementById('sessionId').value.trim();
+    }
+
+    // ── Logging ───────────────────────────────────────────────
+    function log(msg, type = 'info') {
+        const el = document.getElementById('log');
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        el.appendChild(entry);
+        el.scrollTop = el.scrollHeight;
+    }
+
+    function clearLog() {
+        document.getElementById('log').innerHTML = '';
+    }
+
+    // ── Auth ──────────────────────────────────────────────────
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include'
+        });
+        if (res.ok) {
+            log('Logged in successfully', 'event');
+        } else {
+            log(`Login failed: ${res.status}`, 'error');
+        }
+    }
+
+    // ── SignalR ───────────────────────────────────────────────
+    async function connectHub() {
+        connection = new signalR.HubConnectionBuilder()
+            .withUrl('/sessionhub')
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on('OnPlay', (position) => {
+            log(`OnPlay @ ${position}s`, 'event');
+            if (locallyPaused) { log('Locally paused — ignoring OnPlay. Click Sync to rejoin.', 'info'); return; }
+            if (!audio.src || audio.src === window.location.href) {
+                log('No song loaded — call Set Song first', 'error');
+                return;
+            }
+            audio.currentTime = position;
+            audio.play().catch(e => log(`Audio play blocked: ${e.message} — click the page first`, 'error'));
+        });
+
+        connection.on('OnPause', (position) => {
+            log(`OnPause @ ${position}s`, 'event');
+            audio.currentTime = position;
+            audio.pause();
+        });
+
+        connection.on('OnSeek', (position) => {
+            log(`OnSeek @ ${position}s`, 'event');
+            audio.currentTime = position;
+        });
+
+        connection.on('OnSongChanged', (songId) => {
+            log(`OnSongChanged → song ${songId}`, 'event');
+            audio.src = `/api/stream/${songId}`;
+            audio.pause();
+        });
+
+        connection.on('OnSync', (position) => {
+            log(`OnSync @ ${position}s`, 'event');
+            if (locallyPaused) { return; }
+            if (Math.abs(audio.currentTime - position) > 1) {
+                audio.currentTime = position;
+            }
+        });
+
+        connection.on('OnQueueUpdated', (queue, index) => {
+            log(`Queue updated: [${queue.join(', ')}] index=${index}`, 'event');
+            renderQueue(queue, index);
+        });
+        connection.on('OnQueueEnded', () => {
+            log('Queue ended — no more songs', 'info');
+            renderQueue([], -1);
+        });
+
+        connection.on('UserJoined', (userId) => log(`UserJoined: ${userId}`, 'event'));
+        connection.on('UserLeft',   (userId) => log(`UserLeft: ${userId}`, 'event'));
+        connection.on('SessionEnded', ()     => log('SessionEnded', 'error'));
+        connection.on('Error', (msg)         => log(`Hub error: ${msg}`, 'error'));
+
+        connection.onreconnected(() => updateHubStatus(true));
+        connection.onclose(()      => updateHubStatus(false));
+
+        try {
+            await connection.start();
+            updateHubStatus(true);
+            log('SignalR connected', 'event');
+        } catch (e) {
+            log(`SignalR connect failed: ${e}`, 'error');
+        }
+    }
+
+    async function disconnectHub() {
+        if (connection) {
+            await connection.stop();
+            updateHubStatus(false);
+        }
+    }
+
+    function updateHubStatus(connected) {
+        const el = document.getElementById('hubStatus');
+        el.textContent = connected ? 'Connected' : 'Disconnected';
+        el.className = `status ${connected ? 'connected' : 'disconnected'}`;
+    }
+
+    async function autoSubscribe(sessionId) {
+        if (!connection || connection.state === signalR.HubConnectionState.Disconnected) {
+            await connectHub();
+        }
+        if (connection.state === signalR.HubConnectionState.Connected) {
+            await hubInvoke('Subscribe', sessionId);
+            log(`Auto-subscribed to session ${sessionId}`, 'info');
+        } else {
+            log('Could not connect to hub — click Connect manually and then Subscribe', 'error');
+        }
+    }
+
+    async function subscribe() {
+        const id = document.getElementById('subscribeSessionId').value.trim() || getSessionId();
+        await hubInvoke('Subscribe', id);
+    }
+
+    // ── Sessions (REST) ───────────────────────────────────────
+    async function createSession() {
+        const res = await fetch('/api/sessions', {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('sessionId').value = data.id;
+            document.getElementById('currentSession').textContent = `Active: ${data.id}`;
+            isHost = true;
+            locallyPaused = false;
+            updateRoleLabel();
+            log(`Session created: ${data.id}`, 'event');
+            log(JSON.stringify(data, null, 2), 'info');
+            await autoSubscribe(data.id);
+        } else {
+            log(`Create session failed: ${res.status}`, 'error');
+        }
+    }
+
+    async function listSessions() {
+        const res = await fetch('/api/sessions', { credentials: 'include' });
+        const data = await res.json();
+        log(`Sessions: ${JSON.stringify(data)}`, 'info');
+    }
+
+    async function joinSession() {
+        const id = getSessionId();
+        const res = await fetch(`/api/sessions/${id}/join`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('currentSession').textContent = `Active: ${data.id}`;
+            isHost = false;
+            locallyPaused = false;
+            updateRoleLabel();
+            log(`Joined session: ${id}`, 'event');
+            log(JSON.stringify(data, null, 2), 'info');
+            if (data.currentSongId) {
+                audio.src = `/api/stream/${data.currentSongId}`;
+                audio.currentTime = estimatePosition(data);
+            }
+            await autoSubscribe(data.id);
+        } else {
+            log(`Join failed: ${res.status}`, 'error');
+        }
+    }
+
+    async function leaveSession() {
+        const id = getSessionId();
+        const res = await fetch(`/api/sessions/${id}/leave`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        if (res.ok) {
+            isHost = false;
+            locallyPaused = false;
+            updateRoleLabel();
+            document.getElementById('currentSession').textContent = 'No active session';
+            log(`Left session: ${id}`, 'event');
+        } else {
+            log(`Leave failed: ${res.status}`, 'error');
+        }
+    }
+
+    // ── Playback (SignalR) ────────────────────────────────────
+    async function changeSong() {
+        const songId = parseInt(document.getElementById('songId').value);
+        if (!songId) { log('Enter a valid song ID', 'error'); return; }
+
+        const check = await fetch(`/api/stream/${songId}`, { credentials: 'include', headers: { Range: 'bytes=0-1' } });
+        if (!check.ok) {
+            log(`Stream check failed: HTTP ${check.status} for song ${songId}`, 'error');
+            return;
+        }
+
+        await hubInvoke('ChangeSong', getSessionId(), songId);
+        audio.src = `/api/stream/${songId}`;
+        audio.load();
+        log(`Song ${songId} loaded`, 'info');
+    }
+
+    async function play() {
+        if (isHost) {
+            const position = parseFloat(document.getElementById('position').value) || 0;
+            await hubInvoke('Play', getSessionId(), position);
+        } else {
+            // Resume local playback only
+            audio.play().catch(e => log(`Audio play blocked: ${e.message}`, 'error'));
+            locallyPaused = false;
+            updateRoleLabel();
+            log('Resumed locally', 'info');
+        }
+    }
+
+    async function pause() {
+        if (isHost) {
+            const position = audio.currentTime;
+            document.getElementById('position').value = position.toFixed(1);
+            await hubInvoke('Pause', getSessionId(), position);
+        } else {
+            // Pause local playback only — does not affect the session
+            audio.pause();
+            locallyPaused = true;
+            updateRoleLabel();
+            log('Paused locally — session continues. Click Sync to rejoin.', 'info');
+        }
+    }
+
+    async function seek() {
+        const position = parseFloat(document.getElementById('position').value) || 0;
+        await hubInvoke('Seek', getSessionId(), position);
+    }
+
+    async function sync() {
+        if (isHost) {
+            await hubInvoke('Sync', getSessionId(), audio.currentTime);
+        } else {
+            // Fetch current session state and resync local audio
+            const res = await fetch(`/api/sessions/${getSessionId()}`, { credentials: 'include' });
+            if (!res.ok) { log(`Sync failed: ${res.status}`, 'error'); return; }
+            const session = await res.json();
+            locallyPaused = false;
+            updateRoleLabel();
+            const position = estimatePosition(session);
+            audio.currentTime = position;
+            if (session.isPlaying) {
+                audio.play().catch(e => log(`Audio play blocked: ${e.message}`, 'error'));
+            }
+            log(`Synced to position ${position.toFixed(1)}s`, 'event');
+        }
+    }
+
+    // ── Queue ─────────────────────────────────────────────────
+    async function addToQueue() {
+        const songId = parseInt(document.getElementById('queueSongId').value);
+        if (!songId) { log('Enter a valid song ID', 'error'); return; }
+
+        const res = await fetch(`/api/sessions/${getSessionId()}/queue`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ songId }),
+            credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderQueue(data.queue, data.queueIndex);
+            log(`Song ${songId} added to queue`, 'event');
+        } else {
+            log(`Add to queue failed: ${res.status}`, 'error');
+        }
+    }
+
+    async function skipNext() {
+        const res = await fetch(`/api/sessions/${getSessionId()}/next`, {
+            method: 'POST', credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderQueue(data.queue, data.queueIndex);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            log(`Skip next failed: ${err.message ?? res.status}`, 'error');
+        }
+    }
+
+    async function skipPrevious() {
+        const res = await fetch(`/api/sessions/${getSessionId()}/previous`, {
+            method: 'POST', credentials: 'include'
+        });
+        if (res.ok) {
+            const data = await res.json();
+            renderQueue(data.queue, data.queueIndex);
+        } else {
+            const err = await res.json().catch(() => ({}));
+            log(`Skip previous failed: ${err.message ?? res.status}`, 'error');
+        }
+    }
+
+    function renderQueue(queue, index) {
+        const el = document.getElementById('queueList');
+        if (!queue || queue.length === 0) { el.textContent = 'Queue empty'; return; }
+        el.innerHTML = queue.map((songId, i) =>
+            `<div style="padding:2px 0;${i === index ? 'color:#1db954;font-weight:bold;' : ''}">
+                ${i === index ? '▶ ' : `${i + 1}. `}Song ${songId}
+            </div>`
+        ).join('');
+    }
+
+    function estimatePosition(session) {
+        if (session.isPlaying && session.playbackStartedAt) {
+            const elapsed = (Date.now() - new Date(session.playbackStartedAt).getTime()) / 1000;
+            return session.playbackPosition + elapsed;
+        }
+        return session.playbackPosition;
+    }
+
+    function updateRoleLabel() {
+        const label = isHost ? 'Host' : (locallyPaused ? 'Member (locally paused)' : 'Member');
+        document.getElementById('roleLabel').textContent = label;
+    }
+
+    async function hubInvoke(method, ...args) {
+        if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+            log('Not connected to hub', 'error');
+            return;
+        }
+        try {
+            await connection.invoke(method, ...args);
+            log(`→ ${method}(${args.join(', ')})`, 'sent');
+        } catch (e) {
+            log(`Hub invoke failed (${method}): ${e}`, 'error');
+        }
+    }
+</script>
+</body>
+</html>
