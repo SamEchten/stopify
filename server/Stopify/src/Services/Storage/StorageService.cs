@@ -4,7 +4,7 @@ namespace Stopify.Services.Storage;
 
 public class StorageService(HashingService hashingService) : IService
 {
-    public string UploadFile(IFormFile file, string folderLocation)
+    public async Task<string> UploadFile(IFormFile file, string folderLocation)
     {
         Directory.CreateDirectory(folderLocation);
 
@@ -12,9 +12,9 @@ public class StorageService(HashingService hashingService) : IService
 
         var filePath = Path.Combine(folderLocation, fileName);
 
-        using var stream = new FileStream(filePath, FileMode.Create);
+        await using var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
 
-        file.CopyToAsync(stream);
+        await file.CopyToAsync(stream);
 
         return filePath;
     }

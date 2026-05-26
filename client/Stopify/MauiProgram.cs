@@ -31,6 +31,7 @@ namespace Stopify
             builder.Services.AddSingleton<IAuthStateService, AuthStateService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ISongService, SongService>();
+            builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();

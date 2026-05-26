@@ -15,9 +15,9 @@ public class SongController(SongService songService, SongRepository songReposito
 {
     [AuthorizeArtist]
     [HttpPost("upload", Name = "UploadSong")]
-    public ActionResult UploadSong([FromForm] UploadSongRequest request)
+    public async Task<ActionResult> UploadSong([FromForm] UploadSongRequest request)
     {
-        var song = songService.UploadSong(request.SongName, request.ArtistIds, request.file);
+        var song = await songService.UploadSong(request.SongName, request.ArtistIds, request.file);
 
         return Ok(song);
     }

@@ -1,3 +1,23 @@
 @page "/logout"
+@layout Layout.LoginLayout
+@using System.Net
+@using Stopify.Services.Auth
+@inject IAuthService AuthService
+@inject IAuthStateService AuthState
+@inject CookieContainer CookieContainer
+@inject NavigationManager Nav
 
-<h1>Logout</h1>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.LogoutAsync();
+
+        foreach (Cookie cookie in CookieContainer.GetAllCookies())
+        {
+            cookie.Expired = true;
+        }
+
+        AuthState.SetAuthenticated(false);
+        Nav.NavigateTo("/login");
+    }
+}
