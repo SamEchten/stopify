@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+using System.Net;
+using Microsoft.Extensions.Logging;
+using Stopify.Services.Auth;
+using Stopify.Services.Music;
 
 namespace Stopify
 {
@@ -15,6 +18,19 @@ namespace Stopify
                 });
 
             builder.Services.AddMauiBlazorWebView();
+
+            var cookieContainer = new CookieContainer();
+            var httpHandler = new HttpClientHandler { CookieContainer = cookieContainer, UseCookies = true };
+            builder.Services.AddSingleton(cookieContainer);
+            builder.Services.AddSingleton(httpHandler);
+            builder.Services.AddScoped(sp => new HttpClient(sp.GetRequiredService<HttpClientHandler>(), disposeHandler: false)
+            {
+                BaseAddress = new Uri("http://localhost:5232")
+            });
+
+            builder.Services.AddSingleton<IAuthStateService, AuthStateService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
