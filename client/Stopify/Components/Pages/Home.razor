@@ -1,3 +1,47 @@
 @page "/"
+@using Stopify.Models.Music
+@using Stopify.Services.Music
+@using Stopify.Services.Auth
+@inject ISongService SongService
+@inject IAuthStateService AuthState
 
-<h1>Home</h1>
+<div class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Time to listen!</h1>
+        <p class="hero-subtitle">100+ songs</p>
+        <a href="/playlists" class="hero-btn">Playlists</a>
+    </div>
+</div>
+
+<div class="song-list-section">
+    <div class="song-list-header">
+        <span class="col-title">Title</span>
+    </div>
+
+    @if (songs.Count == 0)
+    {
+        <p class="text-white-50 px-4 py-3">No songs found.</p>
+    }
+    else
+    {
+        @foreach (var song in songs)
+        {
+            <div class="song-row">
+                <img src="images/music_note.png" class="song-thumb" alt="song" />
+                <div class="song-info">
+                    <span class="song-name">@song.Name</span>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    private List<Song> songs = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated) return;
+        songs = await SongService.GetRecentSongsAsync();
+    }
+}
