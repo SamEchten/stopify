@@ -56,4 +56,9 @@ public abstract class EntityRepository<TEntity>(ApplicationDbContext context) : 
 
         Context.SaveChanges();
     }
+
+    public void Save()
+    {
+        Context.SaveChanges();
+    }
 }

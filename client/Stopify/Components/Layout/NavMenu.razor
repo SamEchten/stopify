@@ -52,7 +52,7 @@
 			<hr class="playlist-divider"/>
 			@foreach (var playlist in playlists)
 			{
-				<b>@playlist.Title</b>
+				<a href="/playlists/@playlist.Id" class="nav-playlist-item">@playlist.Title</a>
 			}
 		</div>
 

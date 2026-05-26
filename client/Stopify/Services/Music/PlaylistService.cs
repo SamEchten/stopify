@@ -17,4 +17,15 @@ public class PlaylistService(HttpClient http) : IPlaylistService
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<Playlist?> GetPlaylistAsync(int id)
+    {
+        return await http.GetFromJsonAsync<Playlist>($"/api/playlists/{id}");
+    }
+
+    public async Task AddSongToPlaylistAsync(int playlistId, int songId)
+    {
+        var response = await http.PutAsync($"/api/playlists/{playlistId}/{songId}", null);
+        response.EnsureSuccessStatusCode();
+    }
+
 }
