@@ -27,6 +27,15 @@ public class AuthController(AuthService authService): ControllerBase
         return Ok();
     }
 
+    [HttpPost("logout", Name = "Logout")]
+    public ActionResult Logout()
+    {
+        Response.Cookies.Delete("Stopify-AccessToken");
+        Response.Cookies.Delete("Stopify-RefreshToken");
+
+        return Ok();
+    }
+
     [AllowAnonymous]
     [HttpGet("refresh-token", Name="RefreshToken")]
     public ActionResult RefreshToken()
