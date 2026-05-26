@@ -6,6 +6,8 @@
 
 main {
     flex: 1;
+    overflow-y: auto;
+    height: 100vh;
 }
 
 .sidebar {
@@ -70,8 +72,12 @@ main {
             width: 0;
         }
 
-    .top-row, article {
+    .top-row {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
+    }
+
+    article {
+        padding: 0 !important;
     }
 }

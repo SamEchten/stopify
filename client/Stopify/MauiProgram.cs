@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Stopify.Services.Auth;
+using Stopify.Services.Music;
 
 namespace Stopify
 {
@@ -22,13 +23,14 @@ namespace Stopify
             var httpHandler = new HttpClientHandler { CookieContainer = cookieContainer, UseCookies = true };
             builder.Services.AddSingleton(cookieContainer);
             builder.Services.AddSingleton(httpHandler);
-            builder.Services.AddScoped(sp => new HttpClient(sp.GetRequiredService<HttpClientHandler>())
+            builder.Services.AddScoped(sp => new HttpClient(sp.GetRequiredService<HttpClientHandler>(), disposeHandler: false)
             {
                 BaseAddress = new Uri("http://localhost:5232")
             });
 
             builder.Services.AddSingleton<IAuthStateService, AuthStateService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ISongService, SongService>();
 
 #if DEBUG
     		builder.Services.AddBlazorWebViewDeveloperTools();
