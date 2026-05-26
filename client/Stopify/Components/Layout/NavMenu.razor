@@ -1,12 +1,16 @@
-﻿<div class="top-row p-3 m-auto ">
+@using Stopify.Services.Music
+@using Stopify.Services.Auth
+@using Stopify.Models.Music
+@inject IPlaylistService PlaylistService
+@inject IAuthStateService AuthState
+
+<div class="top-row p-3 m-auto ">
     <div class="container-fluid">
         <img src="images/logo.png" width="140px"/>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable px-5 py-4" onclick="document.querySelector('.navbar-toggler').click()">
+<div class="nav-scrollable px-5 py-4">
 	<nav class="d-flex flex-column gap-4">
 		<div class="col gap-2">
 			<div class="nav-item">
@@ -20,9 +24,16 @@
 				</NavLink>
 			</div>
 			<div class="nav-item">
-				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/create-playlist">
+				<div class="d-flex flex-row text-light gap-3 nav-clickable" @onclick="ToggleCreateForm">
 					<span class="create-icon"></span> Create playlist
-				</NavLink>
+				</div>
+				@if (showCreateForm)
+				{
+					<div class="create-playlist-form d-flex flex-row gap-2 mt-2">
+						<input class="create-playlist-input" type="text" placeholder="Playlist name..." @bind="newPlaylistTitle" @bind:event="oninput" @onkeydown="HandleCreateKeyDown" />
+						<button class="create-playlist-btn" @onclick="HandleCreatePlaylist" disabled="@isCreating">+</button>
+					</div>
+				}
 			</div>
 			<div class="nav-item">
 				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/join-session">
@@ -35,35 +46,67 @@
 				</NavLink>
 			</div>
 		</div>
-		
-	
+
 		<hr class="text-white"/>
-		
+
 		<div class="d-flex flex-column gap-2 text-white">
-			<b>My first playlist</b>
-			<b>Xmas bangers</b>
-			<b>School party</b>
-			<b>Remix tracks</b>
+			@foreach (var playlist in playlists)
+			{
+				<b>@playlist.Title</b>
+			}
 		</div>
-		
-		<div class="text-white">
-			<div>
-				<span class="flex">
-					<NavLink href="/profile" class="text-white text-decoration-none d-flex flex-row gap-2">
-						<img/> 
-						<p>Profile</p>
-					</NavLink>
-				</span>
+
+		<div class="mt-auto d-flex flex-column gap-2 text-white">
+			<div class="nav-item">
+				<NavLink href="/profile" class="d-flex flex-row text-light gap-3 text-decoration-none">
+					<span class="profile-icon"></span>
+					<p>Profile</p>
+				</NavLink>
 			</div>
-			<div>
-				<span class="flex">
-					<NavLink href="/logout" class="text-white text-decoration-none d-flex flex-row gap-2">
-						<span>test</span> 
-						<p>Log out</p>
-					</NavLink>
-				</span>
+			<div class="nav-item">
+				<NavLink href="/logout" class="d-flex flex-row text-light gap-3 text-decoration-none">
+					<span class="logout-icon"></span>
+					<p>Log out</p>
+				</NavLink>
 			</div>
 		</div>
 	</nav>
 
 </div>
+
+@code {
+    private List<Playlist> playlists = [];
+    private string newPlaylistTitle = "";
+    private bool isCreating = false;
+    private bool showCreateForm = false;
+
+    private void ToggleCreateForm() => showCreateForm = !showCreateForm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated) return;
+        await LoadPlaylists();
+    }
+
+    private async Task LoadPlaylists()
+    {
+        var all = await PlaylistService.GetUserPlaylistsAsync();
+        playlists = all.TakeLast(5).ToList();
+    }
+
+    private async Task HandleCreatePlaylist()
+    {
+        if (string.IsNullOrWhiteSpace(newPlaylistTitle) || isCreating) return;
+        isCreating = true;
+        await PlaylistService.CreatePlaylistAsync(newPlaylistTitle.Trim());
+        newPlaylistTitle = "";
+        showCreateForm = false;
+        await LoadPlaylists();
+        isCreating = false;
+    }
+
+    private async Task HandleCreateKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await HandleCreatePlaylist();
+    }
+}

@@ -15,4 +15,9 @@ public class AuthService(HttpClient http) : IAuthService
 
         return response.IsSuccessStatusCode;
     }
+
+    public async Task LogoutAsync()
+    {
+        await http.PostAsync("/api/auth/logout", null);
+    }
 }
