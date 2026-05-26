@@ -20,4 +20,27 @@ public class AuthService(HttpClient http) : IAuthService
     {
         await http.PostAsync("/api/auth/logout", null);
     }
+
+    public async Task RegisterUserAsync(string username, string email, string password)
+    {
+        var content = new FormUrlEncodedContent([
+            new("username", username),
+            new("email", email),
+            new("password", password)
+        ]);
+        var response = await http.PostAsync("/api/users", content);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task RegisterArtistAsync(string username, string artistName, string email, string password)
+    {
+        var content = new FormUrlEncodedContent([
+            new("username", username),
+            new("artistName", artistName),
+            new("email", email),
+            new("password", password)
+        ]);
+        var response = await http.PostAsync("/api/artists", content);
+        response.EnsureSuccessStatusCode();
+    }
 }
