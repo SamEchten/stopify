@@ -16,16 +16,18 @@
                 <DataAnnotationsValidator />
 
                 <div class="form-group">
+                    <label class="form-label">Email</label>
                     <input type="email"
                            class="form-input @(errorMessage != null ? "input-error" : "")"
-                           placeholder="Email"
+                           placeholder="jouw@email.nl"
                            @bind="model.Email" />
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">Wachtwoord</label>
                     <input type="password"
                            class="form-input @(errorMessage != null ? "input-error" : "")"
-                           placeholder="Wachtwoord"
+                           placeholder="••••••••"
                            @bind="model.Password" />
                 </div>
 

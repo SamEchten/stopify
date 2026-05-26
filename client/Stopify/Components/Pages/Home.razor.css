@@ -1,7 +1,9 @@
 .hero {
     width: 100%;
     height: 320px;
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 40%, #3a3a3a 100%);
+    background-image: url("images/hero_bg.png");
+    background-size: cover;
+    background-position: center;
     display: flex;
     align-items: flex-end;
     padding: 48px;
@@ -14,8 +16,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(135deg, transparent 30%, rgba(0,0,0,0.4) 100%);
+    background: linear-gradient(to right, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%);
     pointer-events: none;
 }
 
@@ -112,4 +113,23 @@
     color: white;
     font-weight: 600;
     font-size: 0.95rem;
+}
+
+.play-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #1db954;
+    border: none;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.play-btn:disabled {
+    opacity: 1;
 }

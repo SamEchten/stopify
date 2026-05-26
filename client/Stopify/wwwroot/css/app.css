@@ -1,8 +1,11 @@
-﻿html, body {
+﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+html, body {
     margin: 0;
     padding: 0;
     height: 100%;
     width: 100%;
+    font-family: 'Poppins', sans-serif;
 }
 
 .login-layout {
@@ -14,7 +17,7 @@
 
 /*#if (SampleContent)*/
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
     background-color: #37353E;
     color: white;
 }
