@@ -75,6 +75,7 @@ public class PlaylistController(PlaylistRepository playlistRepository, PlaylistF
         }
 
         playlist.AddSong(song);
+        playlistRepository.Save();
 
         return playlist;
     }

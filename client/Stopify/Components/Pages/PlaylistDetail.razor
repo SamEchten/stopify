@@ -1,16 +1,14 @@
-@page "/"
+@page "/playlists/{Id:int}"
 @using Stopify.Models.Music
 @using Stopify.Services.Music
 @using Stopify.Services.Auth
-@inject ISongService SongService
 @inject IPlaylistService PlaylistService
 @inject IAuthStateService AuthState
 
 <div class="hero">
     <div class="hero-content">
-        <h1 class="hero-title">Time to listen!</h1>
-        <p class="hero-subtitle">100+ songs</p>
-        <a href="/playlists" class="hero-btn">Playlists</a>
+        <h1 class="hero-title">@(playlist?.Title ?? "Playlist")</h1>
+        <p class="hero-subtitle">@(playlist?.Songs.Count ?? 0) songs</p>
     </div>
 </div>
 
@@ -19,13 +17,17 @@
         <span class="col-title">Title</span>
     </div>
 
-    @if (songs.Count == 0)
+    @if (playlist == null)
     {
-        <p class="text-white-50 px-4 py-3">No songs found.</p>
+        <p class="text-white-50 px-4 py-3">Loading...</p>
+    }
+    else if (playlist.Songs.Count == 0)
+    {
+        <p class="text-white-50 px-4 py-3">No songs in this playlist yet.</p>
     }
     else
     {
-        @foreach (var song in songs)
+        @foreach (var song in playlist.Songs)
         {
             <div class="song-row">
                 <button class="song-play-btn">
@@ -48,11 +50,11 @@
                             @if (showingPlaylistsForSong == song.Id)
                             {
                                 <div class="menu-back" @onclick="() => showingPlaylistsForSong = null">← Back</div>
-                                @if (playlists.Count == 0)
+                                @if (userPlaylists.Count == 0)
                                 {
                                     <p class="floating-menu-placeholder">No playlists found.</p>
                                 }
-                                @foreach (var pl in playlists)
+                                @foreach (var pl in userPlaylists)
                                 {
                                     <button class="menu-item" @onclick="() => AddToPlaylist(song.Id, pl.Id)">@pl.Title</button>
                                 }
@@ -75,16 +77,18 @@
 }
 
 @code {
-    private List<Song> songs = [];
-    private List<Playlist> playlists = [];
+    [Parameter] public int Id { get; set; }
+
+    private Playlist? playlist;
+    private List<Playlist> userPlaylists = [];
     private int? openMenuId;
     private int? showingPlaylistsForSong;
 
     protected override async Task OnInitializedAsync()
     {
         if (!AuthState.IsAuthenticated) return;
-        songs = await SongService.GetRecentSongsAsync();
-        playlists = await PlaylistService.GetUserPlaylistsAsync();
+        playlist = await PlaylistService.GetPlaylistAsync(Id);
+        userPlaylists = await PlaylistService.GetUserPlaylistsAsync();
     }
 
     private void ToggleMenu(int id)

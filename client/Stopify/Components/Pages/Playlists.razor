@@ -1,3 +1,43 @@
 @page "/playlists"
+@using Stopify.Models.Music
+@using Stopify.Services.Music
+@using Stopify.Services.Auth
+@inject IPlaylistService PlaylistService
+@inject IAuthStateService AuthState
 
-<h1>Playlists</h1>
+<div class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Playlists</h1>
+        <p class="hero-subtitle">45 playlists</p>
+    </div>
+</div>
+
+<div class="playlists-section">
+    <p class="section-label">All playlists</p>
+
+    @if (playlists.Count == 0)
+    {
+        <p class="text-white-50">No playlists found.</p>
+    }
+    else
+    {
+        <div class="playlist-grid">
+            @foreach (var playlist in playlists)
+            {
+                <a href="/playlists/@playlist.Id" class="playlist-card">
+                    <span class="playlist-card-title">@playlist.Title</span>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Playlist> playlists = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated) return;
+        playlists = await PlaylistService.GetUserPlaylistsAsync();
+    }
+}

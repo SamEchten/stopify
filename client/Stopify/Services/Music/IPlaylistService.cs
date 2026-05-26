@@ -6,4 +6,6 @@ public interface IPlaylistService
 {
     Task<List<Playlist>> GetUserPlaylistsAsync();
     Task CreatePlaylistAsync(string title);
+    Task<Playlist?> GetPlaylistAsync(int id);
+    Task AddSongToPlaylistAsync(int playlistId, int songId);
 }
