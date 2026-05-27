@@ -8,4 +8,5 @@ public interface IPlaylistService
     Task CreatePlaylistAsync(string title);
     Task<Playlist?> GetPlaylistAsync(int id);
     Task AddSongToPlaylistAsync(int playlistId, int songId);
+    Task RemoveSongFromPlaylistAsync(int playlistId, int songId);
 }
