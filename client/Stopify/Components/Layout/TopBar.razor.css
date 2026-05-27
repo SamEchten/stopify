@@ -259,6 +259,21 @@
     color: white;
 }
 
+/* ── Artist row ── */
+
+.artist-row {
+    cursor: pointer;
+}
+
+.artist-row:hover {
+    background-color: rgba(255,255,255,0.04);
+}
+
+.artist-chevron {
+    color: rgba(255,255,255,0.35);
+    flex-shrink: 0;
+}
+
 /* ── Backdrops ── */
 
 .dropdown-backdrop {
