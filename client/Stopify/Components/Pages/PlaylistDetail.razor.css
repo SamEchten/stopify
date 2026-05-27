@@ -177,3 +177,22 @@
     inset: 0;
     z-index: 99;
 }
+
+.remove-btn {
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.remove-btn:hover {
+    color: #ff4d4d;
+    background-color: rgba(255,77,77,0.1);
+}

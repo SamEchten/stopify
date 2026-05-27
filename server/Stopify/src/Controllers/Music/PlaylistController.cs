@@ -110,6 +110,7 @@ public class PlaylistController(PlaylistRepository playlistRepository, PlaylistF
         }
 
         playlist.DeleteSong(song);
+        playlistRepository.Save();
 
         return Ok(playlist);
     }

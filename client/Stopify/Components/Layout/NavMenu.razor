@@ -15,7 +15,7 @@
 		<div class="col gap-2">
 			<div class="nav-item">
 				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/">
-					<span class="house-icon"></span> <p>Home</p>
+					<span class="house-icon"></span> Home
 				</NavLink>
 			</div>
 			<div class="nav-item">
@@ -55,13 +55,13 @@
 			<div class="nav-item">
 				<NavLink href="/profile" class="d-flex flex-row text-light gap-3 text-decoration-none">
 					<span class="profile-icon"></span>
-					<p>Profile</p>
+					Profile
 				</NavLink>
 			</div>
 			<div class="nav-item">
 				<NavLink href="/logout" class="d-flex flex-row text-light gap-3 text-decoration-none">
 					<span class="logout-icon"></span>
-					<p>Log out</p>
+					Log out
 				</NavLink>
 			</div>
 		</div>
@@ -86,7 +86,7 @@
     private async Task LoadPlaylists()
     {
         var all = await PlaylistService.GetUserPlaylistsAsync();
-        playlists = all.TakeLast(5).ToList();
+        playlists = all.OrderByDescending(p => p.Id).Take(5).ToList();
     }
 
     private async Task HandleCreatePlaylist()

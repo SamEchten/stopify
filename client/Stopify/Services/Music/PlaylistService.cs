@@ -28,4 +28,9 @@ public class PlaylistService(HttpClient http) : IPlaylistService
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task RemoveSongFromPlaylistAsync(int playlistId, int songId)
+    {
+        var response = await http.PostAsync($"/api/playlists/delete-song/{playlistId}/{songId}", null);
+        response.EnsureSuccessStatusCode();
+    }
 }

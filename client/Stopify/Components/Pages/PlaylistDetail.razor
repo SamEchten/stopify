@@ -40,6 +40,14 @@
                 <div class="song-info">
                     <span class="song-name">@song.Name</span>
                 </div>
+                <button class="remove-btn" @onclick="() => RemoveSong(song.Id)" title="Remove from playlist">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                         width="16" height="16">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
                 <div class="song-menu-wrap">
                     <button class="dots-btn" @onclick="() => ToggleMenu(song.Id)" @onclick:stopPropagation>
                         <span class="dot"></span>
@@ -106,5 +114,11 @@
     {
         await PlaylistService.AddSongToPlaylistAsync(playlistId, songId);
         CloseMenu();
+    }
+
+    private async Task RemoveSong(int songId)
+    {
+        await PlaylistService.RemoveSongFromPlaylistAsync(Id, songId);
+        playlist?.Songs.Remove(playlist.Songs.First(s => s.Id == songId));
     }
 }
