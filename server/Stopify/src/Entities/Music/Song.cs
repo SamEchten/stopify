@@ -14,6 +14,8 @@ public class Song : Entity
     [MaxLength(255)]
     public string FileLocation { get; set; }
 
+    public double Duration { get; set; }
+
     [JsonIgnore]
     public ICollection<Artist> Artists { get; set; } = new List<Artist>();
 

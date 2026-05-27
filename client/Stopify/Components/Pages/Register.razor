@@ -16,33 +16,33 @@
                 <button class="toggle-btn @(isArtist ? "active" : "")" @onclick="() => isArtist = true">Artist</button>
             </div>
 
-            <div class="register-form">
+            <form class="register-form" @onsubmit="HandleRegister" @onsubmit:preventDefault>
                 <div class="form-group">
                     <label class="form-label">Username</label>
-                    <input type="text" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="jouw gebruikersnaam" @bind="username" />
+                    <input type="text" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="jouw gebruikersnaam" @bind="username" @bind:event="oninput" />
                 </div>
 
                 @if (isArtist)
                 {
                     <div class="form-group">
                         <label class="form-label">Artist name</label>
-                        <input type="text" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="jouw artiestennaam" @bind="artistName" />
+                        <input type="text" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="jouw artiestennaam" @bind="artistName" @bind:event="oninput" />
                     </div>
                 }
 
                 <div class="form-group">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="jouw@email.nl" @bind="email" />
+                    <input type="email" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="jouw@email.nl" @bind="email" @bind:event="oninput" />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Wachtwoord</label>
-                    <input type="password" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="••••••••" @bind="password" />
+                    <input type="password" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="••••••••" @bind="password" @bind:event="oninput" />
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Herhaal wachtwoord</label>
-                    <input type="password" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="••••••••" @bind="repeatPassword" />
+                    <input type="password" class="form-input @(errorMessage != null ? "input-error" : "")" placeholder="••••••••" @bind="repeatPassword" @bind:event="oninput" />
                 </div>
 
                 @if (errorMessage != null)
@@ -50,14 +50,14 @@
                     <p class="error-message">@errorMessage</p>
                 }
 
-                <button class="login-button" @onclick="HandleRegister" disabled="@isLoading">
+                <button type="submit" class="login-button" disabled="@isLoading">
                     @if (isLoading) { <span>Bezig...</span> } else { <span>Register</span> }
                 </button>
 
-                <button class="login-button secondary-button" @onclick='() => Nav.NavigateTo("/login")'>
+                <button type="button" class="login-button secondary-button" @onclick='() => Nav.NavigateTo("/login")'>
                     Login
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 

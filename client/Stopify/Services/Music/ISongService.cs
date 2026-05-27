@@ -6,4 +6,5 @@ public interface ISongService
 {
     Task<List<Song>> GetRecentSongsAsync();
     Task<List<Song>> SearchSongsAsync(string query);
+    Task<List<Song>> GetAllSongsAsync();
 }

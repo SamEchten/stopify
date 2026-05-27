@@ -136,6 +136,25 @@ public class SessionController(SessionStore sessionStore, IHubContext<SessionHub
         return Ok(new { session.Queue, session.QueueIndex });
     }
 
+    [HttpDelete("{sessionId}/queue/{index}")]
+    public async Task<ActionResult> RemoveFromQueue(string sessionId, int index)
+    {
+        var session = sessionStore.Get(sessionId);
+        if (session == null) return NotFound();
+
+        if (index < 0 || index >= session.Queue.Count)
+            return BadRequest(new { message = "Index out of range" });
+
+        session.Queue.RemoveAt(index);
+
+        if (index < session.QueueIndex)
+            session.QueueIndex--;
+
+        await hubContext.Clients.Group(sessionId).SendAsync("OnQueueUpdated", session.Queue, session.QueueIndex);
+
+        return Ok(new { session.Queue, session.QueueIndex });
+    }
+
     [HttpPost("{sessionId}/next")]
     public async Task<ActionResult> SkipNext(string sessionId)
     {
