@@ -6,16 +6,18 @@ CLIENT_DIR = ./client/Stopify
 
 help:
 	@echo "Available commands:"
-	@echo "  make run-mac     - Start Docker and run Mac Catalyst client"
-	@echo "  make run-windows - Start Docker and run Windows client"
-	@echo "  make stop        - Shut down Docker containers"
+	@echo "  make run-mac          - Start Docker and run Mac Catalyst client"
+	@echo "  make run-mac BUILD=1  - Rebuild Docker image, then run Mac Catalyst client"
+	@echo "  make run-windows      - Start Docker and run Windows client"
+	@echo "  make run-windows BUILD=1 - Rebuild Docker image, then run Windows client"
+	@echo "  make stop             - Shut down Docker containers"
 
 run-mac:
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) up -d $(if $(BUILD),--build,)
 	cd $(CLIENT_DIR) && dotnet run -f net9.0-maccatalyst
 
 run-windows:
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) up -d $(if $(BUILD),--build,)
 	cd $(CLIENT_DIR) && dotnet run -f net9.0-windows10.0.19041.0
 
 stop:
