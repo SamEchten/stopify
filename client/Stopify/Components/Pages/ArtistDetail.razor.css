@@ -1,0 +1,346 @@
+/* ── Hero ── */
+
+.artist-hero {
+    width: 100%;
+    min-height: 200px;
+    background: linear-gradient(135deg, #1a3a2a 0%, #1a1a2e 100%);
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    padding: 40px 48px;
+    box-sizing: border-box;
+}
+
+.artist-hero-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.6);
+    flex-shrink: 0;
+}
+
+.artist-hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.artist-hero-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.artist-hero-name {
+    color: white;
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1.1;
+}
+
+.artist-hero-meta {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ── Content ── */
+
+.artist-content {
+    background-color: #1a1a1a;
+    min-height: calc(100vh - 200px);
+    padding: 32px 48px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.artist-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.section-title {
+    color: white;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 16px;
+}
+
+.empty-msg {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* ── Song list ── */
+
+.song-list-header {
+    display: flex;
+    align-items: center;
+    padding: 0 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.4);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.col-num {
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.col-title {
+    flex: 1;
+}
+
+.col-duration {
+    width: 56px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.song-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+}
+
+.song-row:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.song-index {
+    width: 28px;
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.song-play-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #1db954;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.2s, transform 0.15s;
+}
+
+.song-play-btn:hover {
+    background-color: #1ed760;
+    transform: scale(1.08);
+}
+
+.song-play-btn--sm {
+    width: 28px;
+    height: 28px;
+}
+
+.song-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.song-name {
+    color: white;
+    font-weight: 500;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.song-duration {
+    width: 56px;
+    text-align: right;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.song-menu-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* ── Albums ── */
+
+.album-card {
+    background-color: #242424;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.album-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.album-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background-color: rgba(29,185,84,0.15);
+    color: #1db954;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.album-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.album-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.album-meta {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.8rem;
+}
+
+.album-song-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 4px;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+}
+
+.album-song-row:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+.album-song-name {
+    flex: 1;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.album-song-duration {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* ── Dots menu ── */
+
+.dots-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+}
+
+.dots-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.dot {
+    display: block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.7);
+}
+
+.floating-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 4px);
+    background-color: #3a3a3a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    min-width: 160px;
+    padding: 6px 0;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.floating-menu-placeholder {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    margin: 0;
+}
+
+.menu-item {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.88rem;
+    font-family: 'Poppins', sans-serif;
+    text-align: left;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.menu-item:hover {
+    background-color: rgba(255,255,255,0.08);
+}
+
+.menu-back {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.8rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 4px;
+}
+
+.menu-back:hover {
+    color: white;
+}
+
+.menu-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+}

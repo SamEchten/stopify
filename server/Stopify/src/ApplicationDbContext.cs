@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using Stopify.Entities.Auth;
+using Stopify.Entities.Music;
 using Stopify.Entities.Users;
 using Stopify.Enum.Users;
 using Stopify.Services.Users;
@@ -13,6 +14,7 @@ public partial class ApplicationDbContext(DbContextOptions<ApplicationDbContext>
     public required DbSet<RefreshToken> RefreshTokens { get; set; }
     public required DbSet<UserRole> UserRoles { get; set; }
     public required DbSet<Artist> Artists { get; set; }
+    public required DbSet<Album> Albums { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

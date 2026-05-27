@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Stopify.DTO.Music;
 using Stopify.Entities.Users;
+using Stopify.Repositories.Music;
 using Stopify.Repositories.Users;
 using Stopify.Requests.Users;
 using Stopify.Services.Users;
@@ -8,7 +10,7 @@ namespace Stopify.Controllers.Users;
 
 [Controller]
 [Route("api/artists")]
-public class ArtistController(ArtistService artistService, ArtistRepository artistRepository) : ControllerBase
+public class ArtistController(ArtistService artistService, ArtistRepository artistRepository, SongRepository songRepository, AlbumRepository albumRepository) : ControllerBase
 {
     [HttpPost(Name = "CreateArtist")]
     public ActionResult<Artist> CreateArtist(CreateArtistRequest request)
@@ -32,5 +34,23 @@ public class ArtistController(ArtistService artistService, ArtistRepository arti
         var artists = artistRepository.GetAll();
 
         return Ok(artists);
+    }
+
+    [HttpGet("{artistId:int}/songs", Name = "GetArtistSongs")]
+    public ActionResult<ICollection<SongDTO>> GetSongs(int artistId)
+    {
+        var artist = artistRepository.GetById(artistId);
+        if (artist == null) return NotFound();
+
+        return Ok(songRepository.GetByArtistId(artistId));
+    }
+
+    [HttpGet("{artistId:int}/albums", Name = "GetArtistAlbums")]
+    public ActionResult<ICollection<AlbumDTO>> GetAlbums(int artistId)
+    {
+        var artist = artistRepository.GetById(artistId);
+        if (artist == null) return NotFound();
+
+        return Ok(albumRepository.GetByArtistId(artistId));
     }
 }

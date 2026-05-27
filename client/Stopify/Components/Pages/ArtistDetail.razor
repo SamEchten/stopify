@@ -1,0 +1,174 @@
+@page "/artists/{Id:int}"
+@using Stopify.Models.Music
+@using Stopify.Services.Music
+@using Stopify.Services.Auth
+@using Stopify.Services.Player
+@inject IArtistService ArtistService
+@inject IPlaylistService PlaylistService
+@inject IAuthStateService AuthState
+@inject IPlayerStateService Player
+
+<div class="artist-hero">
+    <div class="artist-hero-avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="56" height="56">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+    </div>
+    <div class="artist-hero-info">
+        <span class="artist-hero-label">Artist</span>
+        <h1 class="artist-hero-name">@artistName</h1>
+        <p class="artist-hero-meta">@songs.Count songs · @albums.Count albums</p>
+    </div>
+</div>
+
+<div class="artist-content">
+
+    <section class="artist-section">
+        <h2 class="section-title">Songs</h2>
+
+        @if (songs.Count == 0)
+        {
+            <p class="empty-msg">No songs yet.</p>
+        }
+        else
+        {
+            <div class="song-list-header">
+                <span class="col-num">#</span>
+                <span class="col-title">Title</span>
+                <span class="col-duration">Duration</span>
+            </div>
+            @for (int i = 0; i < songs.Count; i++)
+            {
+                var song = songs[i];
+                var index = i + 1;
+                <div class="song-row">
+                    <span class="song-index">@index</span>
+                    <button class="song-play-btn" @onclick="() => Player.Play(song)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                    <div class="song-info">
+                        <span class="song-name">@song.Name</span>
+                    </div>
+                    <span class="song-duration">@FormatDuration(song.Duration)</span>
+                    <div class="song-menu-wrap">
+                        <button class="dots-btn" @onclick="() => ToggleMenu(song.Id)" @onclick:stopPropagation>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                            <span class="dot"></span>
+                        </button>
+                        @if (openMenuId == song.Id)
+                        {
+                            <div class="floating-menu" @onclick:stopPropagation>
+                                @if (showingPlaylistsForSong == song.Id)
+                                {
+                                    <div class="menu-back" @onclick="() => showingPlaylistsForSong = null">← Back</div>
+                                    @if (playlists.Count == 0)
+                                    {
+                                        <p class="floating-menu-placeholder">No playlists found.</p>
+                                    }
+                                    @foreach (var pl in playlists)
+                                    {
+                                        <button class="menu-item" @onclick="() => AddToPlaylist(song.Id, pl.Id)">@pl.Title</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button class="menu-item" @onclick="() => { Player.AddToQueue(song); CloseMenu(); }">Add to queue</button>
+                                    <button class="menu-item" @onclick="() => showingPlaylistsForSong = song.Id">Add to playlist</button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </section>
+
+    @if (albums.Count > 0)
+    {
+        <section class="artist-section">
+            <h2 class="section-title">Albums</h2>
+            @foreach (var album in albums)
+            {
+                <div class="album-card">
+                    <div class="album-card-header">
+                        <div class="album-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5zm0-5.5c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/>
+                            </svg>
+                        </div>
+                        <div class="album-info">
+                            <span class="album-title">@album.Title</span>
+                            <span class="album-meta">@album.Songs.Count songs</span>
+                        </div>
+                    </div>
+                    @foreach (var song in album.Songs)
+                    {
+                        <div class="album-song-row">
+                            <button class="song-play-btn song-play-btn--sm" @onclick="() => Player.Play(song)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="16" height="16">
+                                    <path d="M8 5v14l11-7z"/>
+                                </svg>
+                            </button>
+                            <span class="album-song-name">@song.Name</span>
+                            <span class="album-song-duration">@FormatDuration(song.Duration)</span>
+                        </div>
+                    }
+                </div>
+            }
+        </section>
+    }
+
+</div>
+
+@if (openMenuId != null)
+{
+    <div class="menu-backdrop" @onclick="CloseMenu"></div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private string artistName = "Artist";
+    private List<Song> songs = [];
+    private List<Album> albums = [];
+    private List<Playlist> playlists = [];
+    private int? openMenuId;
+    private int? showingPlaylistsForSong;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated) return;
+        var allArtists = await ArtistService.GetAllArtistsAsync();
+        var artist = allArtists.FirstOrDefault(a => a.Id == Id);
+        if (artist != null) artistName = artist.Name;
+
+        songs = await ArtistService.GetArtistSongsAsync(Id);
+        albums = await ArtistService.GetArtistAlbumsAsync(Id);
+        playlists = await PlaylistService.GetUserPlaylistsAsync();
+    }
+
+    private static string FormatDuration(double totalSeconds)
+    {
+        var ts = TimeSpan.FromSeconds(totalSeconds);
+        return totalSeconds >= 3600
+            ? $"{(int)ts.TotalHours}:{ts.Minutes:D2}:{ts.Seconds:D2}"
+            : $"{ts.Minutes}:{ts.Seconds:D2}";
+    }
+
+    private void ToggleMenu(int id)
+    {
+        if (openMenuId == id) { openMenuId = null; showingPlaylistsForSong = null; }
+        else { openMenuId = id; showingPlaylistsForSong = null; }
+    }
+
+    private void CloseMenu() { openMenuId = null; showingPlaylistsForSong = null; }
+
+    private async Task AddToPlaylist(int songId, int playlistId)
+    {
+        await PlaylistService.AddSongToPlaylistAsync(playlistId, songId);
+        CloseMenu();
+    }
+}

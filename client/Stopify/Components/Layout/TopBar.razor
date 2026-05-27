@@ -7,6 +7,7 @@
 @inject IPlaylistService PlaylistService
 @inject IAuthStateService AuthState
 @inject IPlayerStateService Player
+@inject NavigationManager Nav
 @implements IDisposable
 
 <div class="top-bar">
@@ -115,7 +116,7 @@
                     {
                         @foreach (var artist in artistResults)
                         {
-                            <div class="song-row">
+                            <div class="song-row artist-row" @onclick="() => NavigateToArtist(artist.Id)">
                                 <div class="result-icon result-icon--artist">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -124,6 +125,9 @@
                                 <div class="song-info">
                                     <span class="song-name">@artist.Name</span>
                                 </div>
+                                <svg class="artist-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                    <polyline points="9 18 15 12 9 6"/>
+                                </svg>
                             </div>
                         }
                     }
@@ -192,6 +196,12 @@
 
     private void SetSongsTab() => activeTab = "songs";
     private void SetArtistsTab() => activeTab = "artists";
+
+    private void NavigateToArtist(int artistId)
+    {
+        CloseDropdown();
+        Nav.NavigateTo($"/artists/{artistId}");
+    }
 
     private void PlaySong(Song song)
     {
