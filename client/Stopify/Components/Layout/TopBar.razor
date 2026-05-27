@@ -1,9 +1,12 @@
 @using Stopify.Models.Music
 @using Stopify.Services.Music
 @using Stopify.Services.Auth
+@using Stopify.Services.Player
 @inject ISongService SongService
+@inject IArtistService ArtistService
 @inject IPlaylistService PlaylistService
 @inject IAuthStateService AuthState
+@inject IPlayerStateService Player
 @implements IDisposable
 
 <div class="top-bar">
@@ -17,7 +20,7 @@
             </svg>
             <input type="text"
                    class="search-input"
-                   placeholder="Search songs..."
+                   placeholder="Search songs, artists..."
                    value="@searchQuery"
                    @oninput="OnSearchInput" />
         </div>
@@ -25,56 +28,104 @@
         @if (dropdownVisible)
         {
             <div class="search-dropdown" @onclick="CloseMenu">
+                <div class="search-tabs">
+                    <button class="search-tab @(activeTab == "songs" ? "search-tab--active" : "")"
+                            @onclick="SetSongsTab" @onclick:stopPropagation>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                        </svg>
+                        Songs
+                    </button>
+                    <button class="search-tab @(activeTab == "artists" ? "search-tab--active" : "")"
+                            @onclick="SetArtistsTab" @onclick:stopPropagation>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="13" height="13">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        Artists
+                    </button>
+                </div>
+
                 @if (searching)
                 {
                     <p class="dropdown-message">Searching...</p>
                 }
-                else if (results.Count == 0)
+                else if (activeTab == "songs")
                 {
-                    <p class="dropdown-message">No songs found.</p>
+                    @if (songResults.Count == 0)
+                    {
+                        <p class="dropdown-message">No songs found.</p>
+                    }
+                    else
+                    {
+                        @foreach (var song in songResults)
+                        {
+                            <div class="song-row">
+                                <div class="result-icon result-icon--song">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                                    </svg>
+                                </div>
+                                <div class="song-info">
+                                    <span class="song-name">@song.Name</span>
+                                </div>
+                                <button class="song-play-btn" @onclick="() => PlaySong(song)" @onclick:stopPropagation>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                </button>
+                                <div class="song-menu-wrap">
+                                    <button class="dots-btn" @onclick="() => ToggleMenu(song.Id)" @onclick:stopPropagation>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                    </button>
+                                    @if (openMenuId == song.Id)
+                                    {
+                                        <div class="floating-menu" @onclick:stopPropagation>
+                                            @if (showingPlaylistsForSong == song.Id)
+                                            {
+                                                <div class="menu-back" @onclick="() => showingPlaylistsForSong = null">← Back</div>
+                                                @if (playlists.Count == 0)
+                                                {
+                                                    <p class="floating-menu-placeholder">No playlists found.</p>
+                                                }
+                                                @foreach (var pl in playlists)
+                                                {
+                                                    <button class="menu-item" @onclick="() => AddToPlaylist(song.Id, pl.Id)">@pl.Title</button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <button class="menu-item" @onclick="() => showingPlaylistsForSong = song.Id">Add to playlist</button>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
                 }
                 else
                 {
-                    @foreach (var song in results)
+                    @if (artistResults.Count == 0)
                     {
-                        <div class="song-row">
-                            <button class="song-play-btn">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
-                                    <path d="M8 5v14l11-7z"/>
-                                </svg>
-                            </button>
-                            <div class="song-info">
-                                <span class="song-name">@song.Name</span>
+                        <p class="dropdown-message">No artists found.</p>
+                    }
+                    else
+                    {
+                        @foreach (var artist in artistResults)
+                        {
+                            <div class="song-row">
+                                <div class="result-icon result-icon--artist">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                    </svg>
+                                </div>
+                                <div class="song-info">
+                                    <span class="song-name">@artist.Name</span>
+                                </div>
                             </div>
-                            <div class="song-menu-wrap">
-                                <button class="dots-btn" @onclick="() => ToggleMenu(song.Id)" @onclick:stopPropagation>
-                                    <span class="dot"></span>
-                                    <span class="dot"></span>
-                                    <span class="dot"></span>
-                                </button>
-                                @if (openMenuId == song.Id)
-                                {
-                                    <div class="floating-menu" @onclick:stopPropagation>
-                                        @if (showingPlaylistsForSong == song.Id)
-                                        {
-                                            <div class="menu-back" @onclick="() => showingPlaylistsForSong = null">← Back</div>
-                                            @if (playlists.Count == 0)
-                                            {
-                                                <p class="floating-menu-placeholder">No playlists found.</p>
-                                            }
-                                            @foreach (var pl in playlists)
-                                            {
-                                                <button class="menu-item" @onclick="() => AddToPlaylist(song.Id, pl.Id)">@pl.Title</button>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <button class="menu-item" @onclick="() => showingPlaylistsForSong = song.Id">Add to playlist</button>
-                                        }
-                                    </div>
-                                }
-                            </div>
-                        </div>
+                        }
                     }
                 }
             </div>
@@ -85,8 +136,11 @@
 
 @code {
     private string searchQuery = "";
-    private List<Song> results = [];
+    private List<Song> songResults = [];
+    private List<Artist> artistResults = [];
+    private List<Artist> allArtists = [];
     private List<Playlist> playlists = [];
+    private string activeTab = "songs";
     private bool dropdownVisible;
     private bool searching;
     private int? openMenuId;
@@ -95,8 +149,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (AuthState.IsAuthenticated)
-            playlists = await PlaylistService.GetUserPlaylistsAsync();
+        if (!AuthState.IsAuthenticated) return;
+        playlists = await PlaylistService.GetUserPlaylistsAsync();
+        allArtists = await ArtistService.GetAllArtistsAsync();
     }
 
     private async Task OnSearchInput(ChangeEventArgs e)
@@ -106,7 +161,8 @@
         if (string.IsNullOrWhiteSpace(searchQuery))
         {
             dropdownVisible = false;
-            results = [];
+            songResults = [];
+            artistResults = [];
             return;
         }
 
@@ -121,13 +177,26 @@
         try
         {
             await Task.Delay(300, _cts.Token);
-            results = await SongService.SearchSongsAsync(searchQuery);
+            songResults = await SongService.SearchSongsAsync(searchQuery);
+            artistResults = allArtists
+                .Where(a => a.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
+                .Take(10)
+                .ToList();
         }
         catch (TaskCanceledException) { }
         finally
         {
             searching = false;
         }
+    }
+
+    private void SetSongsTab() => activeTab = "songs";
+    private void SetArtistsTab() => activeTab = "artists";
+
+    private void PlaySong(Song song)
+    {
+        Player.Play(song);
+        CloseDropdown();
     }
 
     private void ToggleMenu(int id)
@@ -142,7 +211,8 @@
     {
         dropdownVisible = false;
         searchQuery = "";
-        results = [];
+        songResults = [];
+        artistResults = [];
         openMenuId = null;
         showingPlaylistsForSong = null;
     }

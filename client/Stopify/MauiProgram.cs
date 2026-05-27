@@ -47,6 +47,7 @@ namespace Stopify
             builder.Services.AddSingleton<ISessionSyncService, SessionSyncService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ISongService, SongService>();
+            builder.Services.AddScoped<IArtistService, ArtistService>();
             builder.Services.AddScoped<IPlaylistService, PlaylistService>();
             builder.Services.AddScoped<ISessionService, SessionService>();
 
