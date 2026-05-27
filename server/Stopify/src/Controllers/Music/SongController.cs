@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stopify.Attribute.Auth;
+using Stopify.DTO.Music;
 using Stopify.Entities.Music;
 using Stopify.Repositories.Music;
 using Stopify.Requests.Music;
@@ -38,5 +39,15 @@ public class SongController(SongService songService, SongRepository songReposito
         if (song == null) return NotFound();
 
         return Ok(song);
+    }
+
+    [HttpGet("search", Name = "SearchSongs")]
+    public ActionResult<ICollection<SongDTO>> SearchSongs([FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Ok(new List<SongDTO>());
+
+        var songs = songRepository.Search(q);
+        return Ok(songs);
     }
 }
