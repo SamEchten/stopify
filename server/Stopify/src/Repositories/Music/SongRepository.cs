@@ -21,4 +21,22 @@ public class SongRepository(ApplicationDbContext context) : EntityRepository<Son
             })
             .FirstOrDefault();
     }
+
+    public ICollection<SongDTO> Search(string query)
+    {
+        return DbSet
+            .Include(s => s.Artists)
+            .Where(s => s.Name.Contains(query))
+            .Take(8)
+            .Select(s => new SongDTO
+            {
+                Id = s.Id,
+                Name = s.Name,
+                FileLocation = s.FileLocation,
+                Artists = s.Artists
+                    .Select(a => new ArtistDTO { Id = a.Id, Name = a.Name })
+                    .ToList()
+            })
+            .ToList();
+    }
 }
