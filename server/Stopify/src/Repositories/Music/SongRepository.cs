@@ -42,6 +42,22 @@ public class SongRepository(ApplicationDbContext context) : EntityRepository<Son
             .ToList();
     }
 
+    public new ICollection<SongDTO> GetAll()
+    {
+        return DbSet
+            .Select(s => new SongDTO
+            {
+                Id = s.Id,
+                Name = s.Name,
+                FileLocation = s.FileLocation,
+                Duration = s.Duration,
+                Artists = s.Artists
+                    .Select(a => new ArtistDTO { Id = a.Id, Name = a.Name })
+                    .ToList()
+            })
+            .ToList();
+    }
+
     public ICollection<SongDTO> GetByArtistId(int artistId)
     {
         return DbSet

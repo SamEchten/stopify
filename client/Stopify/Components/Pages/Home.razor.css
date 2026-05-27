@@ -109,6 +109,22 @@
     font-size: 0.95rem;
 }
 
+.song-artist {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+}
+
+.artist-link {
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+}
+
+.artist-link:hover {
+    color: white;
+    text-decoration: underline;
+}
+
 .song-menu-wrap {
     position: relative;
     flex-shrink: 0;

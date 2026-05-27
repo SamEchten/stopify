@@ -39,6 +39,14 @@
                 </button>
                 <div class="song-info">
                     <span class="song-name">@song.Name</span>
+                    <span class="song-artist">
+                        @for (int j = 0; j < song.Artists.Count; j++)
+                        {
+                            var artist = song.Artists[j];
+                            <a class="artist-link" href="/artists/@artist.Id">@artist.Name</a>
+                            if (j < song.Artists.Count - 1) { <text>, </text> }
+                        }
+                    </span>
                 </div>
                 <button class="remove-btn" @onclick="() => RemoveSong(song.Id)" title="Remove from playlist">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"

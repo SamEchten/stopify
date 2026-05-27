@@ -361,9 +361,11 @@ namespace Stopify.Migrations
 
             modelBuilder.Entity("Stopify.Entities.Music.Song", b =>
                 {
-                    b.HasOne("Stopify.Entities.Music.Album", null)
+                    b.HasOne("Stopify.Entities.Music.Album", "Album")
                         .WithMany("Songs")
                         .HasForeignKey("AlbumId");
+
+                    b.Navigation("Album");
                 });
 
             modelBuilder.Entity("Stopify.Entities.Users.Artist", b =>

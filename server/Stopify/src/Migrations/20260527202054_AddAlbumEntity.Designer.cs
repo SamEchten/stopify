@@ -12,7 +12,7 @@ using Stopify;
 namespace Stopify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260527195542_AddAlbumEntity")]
+    [Migration("20260527202054_AddAlbumEntity")]
     partial class AddAlbumEntity
     {
         /// <inheritdoc />
@@ -364,9 +364,11 @@ namespace Stopify.Migrations
 
             modelBuilder.Entity("Stopify.Entities.Music.Song", b =>
                 {
-                    b.HasOne("Stopify.Entities.Music.Album", null)
+                    b.HasOne("Stopify.Entities.Music.Album", "Album")
                         .WithMany("Songs")
                         .HasForeignKey("AlbumId");
+
+                    b.Navigation("Album");
                 });
 
             modelBuilder.Entity("Stopify.Entities.Users.Artist", b =>
