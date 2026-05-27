@@ -20,25 +20,25 @@ public class SongService(
 
         logger.LogInformation("Uploaded song {songName} to {fileLocation}", songName, fileLocation);
 
-        double duration = 0;
         try
         {
             using var tagFile = TagLib.File.Create(fileLocation);
-            duration = tagFile.Properties.Duration.TotalSeconds;
+
+            var artists = artistIds
+                .Select(artistId => artistRepository.GetById(artistId) ?? throw new Exception($"Artist with id: {artistId} not found"))
+                .ToList();
+
+            var song = songFactory.Create(songName, artists, fileLocation, tagFile.Properties.Duration.TotalSeconds);
+
+            songRepository.Add(song);
+
+            return song;
         }
         catch (Exception ex)
         {
-            logger.LogWarning("Could not read duration for {songName}: {message}", songName, ex.Message);
+            logger.LogWarning("Could not create song {songName}, because of error: {error}", songName, ex.Message);
+
+            throw ex;
         }
-
-        var artists = artistIds
-            .Select(artistId => artistRepository.GetById(artistId) ?? throw new Exception($"Artist with id: {artistId} not found"))
-            .ToList();
-
-        var song = songFactory.Create(songName, artists, fileLocation, duration);
-
-        songRepository.Add(song);
-
-        return song;
     }
 }
