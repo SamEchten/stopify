@@ -16,9 +16,13 @@ public class Song : Entity
 
     public double Duration { get; set; }
 
-    [JsonIgnore]
     public ICollection<Artist> Artists { get; set; } = new List<Artist>();
 
     [JsonIgnore]
     public ICollection<Playlist> Playlists { get; set; } = new List<Playlist>();
+
+    public int? AlbumId { get; set; }
+
+    [JsonIgnore]
+    public Album? Album { get; set; }
 }

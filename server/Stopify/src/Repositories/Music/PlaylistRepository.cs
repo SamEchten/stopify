@@ -10,6 +10,7 @@ public class PlaylistRepository(ApplicationDbContext context) : EntityRepository
     {
         return DbSet
             .Include(p => p.Songs)
+                .ThenInclude(s => s.Artists)
             .SingleOrDefault(p => p.Id == id);
     }
 

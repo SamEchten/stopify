@@ -24,7 +24,7 @@ public class SongController(SongService songService, SongRepository songReposito
     }
 
     [HttpGet(Name = "GetSongs")]
-    public ActionResult<ICollection<Song>> GetSongs()
+    public ActionResult<ICollection<SongDTO>> GetSongs()
     {
         var songs = songRepository.GetAll();
 

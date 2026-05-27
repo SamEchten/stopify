@@ -177,6 +177,26 @@
     display: block;
 }
 
+.song-artist {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.45);
+    margin-top: 1px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-link {
+    color: rgba(255,255,255,0.45);
+    text-decoration: none;
+}
+
+.artist-link:hover {
+    color: white;
+    text-decoration: underline;
+}
+
 .song-menu-wrap {
     position: relative;
     flex-shrink: 0;

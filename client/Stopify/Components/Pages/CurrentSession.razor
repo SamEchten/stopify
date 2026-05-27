@@ -160,10 +160,23 @@ else
                 <div class="song-row @(index == sessionQueue.QueueIndex ? "song-row--active" : "")">
                     <div class="song-index">@(index + 1)</div>
                     <div class="song-info">
-                        <span class="song-name">@(song?.Name ?? $"Song #{songId}")</span>
-                        @if (index == sessionQueue.QueueIndex)
+                        <div class="song-name-row">
+                            <span class="song-name">@(song?.Name ?? $"Song #{songId}")</span>
+                            @if (index == sessionQueue.QueueIndex)
+                            {
+                                <span class="now-playing-badge">Now playing</span>
+                            }
+                        </div>
+                        @if (song != null && song.Artists.Count > 0)
                         {
-                            <span class="now-playing-badge">Now playing</span>
+                            <span class="song-artist">
+                                @for (int j = 0; j < song.Artists.Count; j++)
+                                {
+                                    var artist = song.Artists[j];
+                                    <a class="artist-link" href="/artists/@artist.Id">@artist.Name</a>
+                                    if (j < song.Artists.Count - 1) { <text>, </text> }
+                                }
+                            </span>
                         }
                     </div>
                     @if (index != sessionQueue.QueueIndex)

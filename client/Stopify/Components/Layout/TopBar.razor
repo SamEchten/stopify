@@ -68,6 +68,14 @@
                                 </div>
                                 <div class="song-info">
                                     <span class="song-name">@song.Name</span>
+                                    <span class="song-artist">
+                                        @for (int j = 0; j < song.Artists.Count; j++)
+                                        {
+                                            var ar = song.Artists[j];
+                                            <a class="artist-link" href="/artists/@ar.Id" @onclick="CloseDropdown" @onclick:stopPropagation>@ar.Name</a>
+                                            if (j < song.Artists.Count - 1) { <text>, </text> }
+                                        }
+                                    </span>
                                 </div>
                                 <button class="song-play-btn" @onclick="() => PlaySong(song)" @onclick:stopPropagation>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
