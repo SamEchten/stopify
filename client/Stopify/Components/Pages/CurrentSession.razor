@@ -1,3 +1,356 @@
 @page "/current-session"
+@using Stopify.Models.Music
+@using Stopify.Models.Session
+@using Stopify.Services.Music
+@using Stopify.Services.Session
+@using Stopify.Services.Auth
+@using Stopify.Services.Player
+@inject ISessionService SessionService
+@inject ISessionStateService SessionState
+@inject ISessionSyncService SessionSync
+@inject ISongService SongService
+@inject IAuthStateService AuthState
+@inject IPlayerStateService Player
+@implements IDisposable
 
-<h1>Current session</h1>
+@if (SessionState.CurrentSessionId == null)
+{
+    <div class="no-session">
+        <div class="no-session-content">
+            <div class="no-session-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="48" height="48">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+            </div>
+            <h2 class="no-session-title">No active session</h2>
+            <p class="no-session-subtitle">Create a new session or join an existing one.</p>
+            <button class="create-session-btn" @onclick="CreateSession" disabled="@isCreating">
+                @(isCreating ? "Creating..." : "Create Session")
+            </button>
+            <div class="join-divider">or</div>
+            <div class="join-form">
+                <input class="join-input" type="text" placeholder="Session ID..." @bind="joinSessionId" @bind:event="oninput" @onkeydown="HandleJoinKeyDown" />
+                <button class="join-btn" @onclick="JoinSession" disabled="@isJoining">
+                    @(isJoining ? "Joining..." : "Join")
+                </button>
+            </div>
+            @if (joinError != null)
+            {
+                <p class="error-text">@joinError</p>
+            }
+            @if (createError != null)
+            {
+                <p class="error-text">@createError</p>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="hero">
+        <div class="hero-content">
+            <div class="hero-title-row">
+                <h1 class="hero-title">Active Session</h1>
+                @if (SessionState.IsHost)
+                {
+                    <span class="host-badge">Host</span>
+                }
+            </div>
+            <div class="hero-stats">
+                <span class="stat">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                    </svg>
+                    @(session?.MemberUserIds.Count ?? 0) members
+                </span>
+                <span class="stat-divider">·</span>
+                <span class="stat">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                    </svg>
+                    @(sessionQueue?.Queue.Count ?? 0) songs
+                </span>
+                <span class="stat-divider">·</span>
+                <span class="stat">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/>
+                    </svg>
+                    @totalTimeDisplay
+                </span>
+            </div>
+            <div class="session-id-row">
+                <span class="session-id-label">ID</span>
+                <span class="session-id-value">@SessionState.CurrentSessionId</span>
+                <button class="copy-id-btn" @onclick="CopySessionId" title="Copy session ID">
+                    @if (idCopied)
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                        </svg>
+                    }
+                </button>
+                <button class="leave-session-btn" @onclick="LeaveSession" disabled="@isLeaving">
+                    @(isLeaving ? "Leaving..." : "Leave")
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="song-list-section">
+        <div class="song-list-header">
+            <span class="col-title">Queue</span>
+            @if (SessionState.IsHost && sessionQueue?.Queue.Count > 0)
+            {
+                <button class="session-play-btn" @onclick="PlayQueue" title="Play queue">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="18" height="18">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+            }
+            <button class="add-song-btn" @onclick="ToggleAddSong" title="Add song to queue">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="20" height="20">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+            </button>
+        </div>
+
+        @if (showAddSong)
+        {
+            <div class="add-song-panel">
+                <input class="add-song-search" type="text" placeholder="Search songs..." @bind="songSearch" @bind:event="oninput" />
+                <div class="add-song-list">
+                    @foreach (var song in FilteredSongs)
+                    {
+                        <button class="add-song-item" @onclick="() => AddSongToQueue(song.Id)">
+                            <span class="add-song-name">@song.Name</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="16" height="16">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                        </button>
+                    }
+                    @if (!FilteredSongs.Any())
+                    {
+                        <p class="add-song-empty">No songs found.</p>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (isLoading)
+        {
+            <p class="text-white-50 px-4 py-3">Loading...</p>
+        }
+        else if (sessionQueue == null || sessionQueue.Queue.Count == 0)
+        {
+            <p class="empty-queue">The queue is empty. Add songs using the + button above.</p>
+        }
+        else
+        {
+            @for (int i = 0; i < sessionQueue.Queue.Count; i++)
+            {
+                var songId = sessionQueue.Queue[i];
+                var song = songLookup.GetValueOrDefault(songId);
+                var index = i;
+                <div class="song-row @(index == sessionQueue.QueueIndex ? "song-row--active" : "")">
+                    <div class="song-index">@(index + 1)</div>
+                    <div class="song-info">
+                        <span class="song-name">@(song?.Name ?? $"Song #{songId}")</span>
+                        @if (index == sessionQueue.QueueIndex)
+                        {
+                            <span class="now-playing-badge">Now playing</span>
+                        }
+                    </div>
+                    @if (index != sessionQueue.QueueIndex)
+                    {
+                        <button class="remove-song-btn" @onclick="() => RemoveSongFromQueue(index)" title="Remove from queue">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                            </svg>
+                        </button>
+                    }
+                </div>
+            }
+        }
+    </div>
+}
+
+@code {
+    private SessionInfo? session;
+    private SessionQueue? sessionQueue;
+    private Dictionary<int, Song> songLookup = [];
+    private List<Song> allSongs = [];
+
+    private bool isLoading = false;
+    private bool isCreating = false;
+    private string? createError = null;
+    private bool isJoining = false;
+    private string joinSessionId = "";
+    private string? joinError = null;
+    private bool showAddSong = false;
+    private string songSearch = "";
+    private bool idCopied = false;
+    private bool isLeaving = false;
+
+    private string totalTimeDisplay
+    {
+        get
+        {
+            if (sessionQueue == null || sessionQueue.Queue.Count == 0) return "—";
+            var totalSeconds = sessionQueue.Queue
+                .Select(id => songLookup.TryGetValue(id, out var s) ? s.Duration : 0)
+                .Sum();
+            if (totalSeconds == 0) return "—";
+            var ts = TimeSpan.FromSeconds(totalSeconds);
+            return ts.TotalHours >= 1
+                ? $"{(int)ts.TotalHours}h {ts.Minutes}m"
+                : $"{ts.Minutes}m {ts.Seconds}s";
+        }
+    }
+
+    private IEnumerable<Song> FilteredSongs =>
+        string.IsNullOrWhiteSpace(songSearch)
+            ? allSongs
+            : allSongs.Where(s => s.Name.Contains(songSearch, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthState.IsAuthenticated) return;
+        SessionSync.OnStateChanged += OnSyncStateChanged;
+        if (SessionState.CurrentSessionId != null)
+            await LoadSession();
+    }
+
+    private async Task LoadSession()
+    {
+        isLoading = true;
+        var sessionId = SessionState.CurrentSessionId!;
+
+        var (sessionResult, queueResult, songsResult) = (
+            await SessionService.GetSessionAsync(sessionId),
+            await SessionService.GetQueueAsync(sessionId),
+            await SongService.GetAllSongsAsync()
+        );
+
+        session = sessionResult;
+        sessionQueue = queueResult;
+        allSongs = songsResult;
+        songLookup = allSongs.ToDictionary(s => s.Id);
+
+        isLoading = false;
+
+        if (!SessionSync.IsConnected)
+            await SessionSync.ConnectAsync(sessionId);
+    }
+
+    private async Task CreateSession()
+    {
+        isCreating = true;
+        createError = null;
+        var created = await SessionService.CreateSessionAsync();
+        if (created != null)
+        {
+            SessionState.SetSession(created.Id, isHost: true);
+            await LoadSession();
+        }
+        else
+        {
+            createError = "Failed to create session. Please try again.";
+        }
+        isCreating = false;
+    }
+
+    private async Task JoinSession()
+    {
+        if (string.IsNullOrWhiteSpace(joinSessionId) || isJoining) return;
+        isJoining = true;
+        joinError = null;
+        var trimmed = joinSessionId.Trim();
+        var success = await SessionService.JoinSessionAsync(trimmed);
+        if (success)
+        {
+            SessionState.SetSession(trimmed, isHost: false);
+            joinSessionId = "";
+            await LoadSession();
+        }
+        else
+        {
+            joinError = "Session not found.";
+        }
+        isJoining = false;
+    }
+
+    private async Task PlayQueue()
+    {
+        if (sessionQueue?.Queue.Count > 0)
+            await SessionSync.ChangeSongAsync(sessionQueue.Queue[0]);
+    }
+
+    private async Task CopySessionId()
+    {
+        await Clipboard.Default.SetTextAsync(SessionState.CurrentSessionId);
+        idCopied = true;
+        StateHasChanged();
+        await Task.Delay(2000);
+        idCopied = false;
+    }
+
+    private void OnSyncStateChanged()
+    {
+        InvokeAsync(async () =>
+        {
+            if (SessionState.CurrentSessionId != null)
+                sessionQueue = await SessionService.GetQueueAsync(SessionState.CurrentSessionId);
+            StateHasChanged();
+        });
+    }
+
+    private async Task LeaveSession()
+    {
+        if (isLeaving) return;
+        isLeaving = true;
+        var sessionId = SessionState.CurrentSessionId!;
+        await SessionSync.DisconnectAsync();
+        await SessionService.LeaveSessionAsync(sessionId);
+        SessionState.ClearSession();
+        Player.Stop();
+        isLeaving = false;
+    }
+
+    public void Dispose()
+    {
+        SessionSync.OnStateChanged -= OnSyncStateChanged;
+    }
+
+    private async Task HandleJoinKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await JoinSession();
+    }
+
+    private void ToggleAddSong()
+    {
+        showAddSong = !showAddSong;
+        songSearch = "";
+    }
+
+    private async Task AddSongToQueue(int songId)
+    {
+        if (SessionState.CurrentSessionId == null) return;
+        await SessionService.AddToQueueAsync(SessionState.CurrentSessionId, songId);
+        showAddSong = false;
+        songSearch = "";
+        sessionQueue = await SessionService.GetQueueAsync(SessionState.CurrentSessionId);
+    }
+
+    private async Task RemoveSongFromQueue(int index)
+    {
+        if (SessionState.CurrentSessionId == null) return;
+        await SessionService.RemoveFromQueueAsync(SessionState.CurrentSessionId, index);
+        sessionQueue = await SessionService.GetQueueAsync(SessionState.CurrentSessionId);
+    }
+}

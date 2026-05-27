@@ -50,19 +50,26 @@ builder.Services.AddAuthentication(options =>
         {
             OnMessageReceived = context =>
             {
-
                 var token = context.Request.Cookies["Stopify-AccessToken"];
                 if (!string.IsNullOrEmpty(token))
                 {
                     context.Token = token;
                 }
-
-                context.Token = context.Request.Cookies["Stopify-AccessToken"];
-
                 return Task.CompletedTask;
             }
         };
     });
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .SetIsOriginAllowed(_ => true)
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -79,6 +86,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseCors();
 
 app.UseRouting();
 

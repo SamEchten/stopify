@@ -1,4 +1,5 @@
-﻿using Stopify.Entities.Music;
+﻿using TagLib;
+using Stopify.Entities.Music;
 using Stopify.Repositories.Music;
 using Stopify.Repositories.Users;
 using Stopify.Services.Storage;
@@ -19,11 +20,22 @@ public class SongService(
 
         logger.LogInformation("Uploaded song {songName} to {fileLocation}", songName, fileLocation);
 
+        double duration = 0;
+        try
+        {
+            using var tagFile = TagLib.File.Create(fileLocation);
+            duration = tagFile.Properties.Duration.TotalSeconds;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("Could not read duration for {songName}: {message}", songName, ex.Message);
+        }
+
         var artists = artistIds
             .Select(artistId => artistRepository.GetById(artistId) ?? throw new Exception($"Artist with id: {artistId} not found"))
             .ToList();
 
-        var song = songFactory.Create(songName, artists, fileLocation);
+        var song = songFactory.Create(songName, artists, fileLocation, duration);
 
         songRepository.Add(song);
 

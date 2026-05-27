@@ -5,6 +5,11 @@ namespace Stopify.Services.Music;
 
 public class SongService(HttpClient http) : ISongService
 {
+    public async Task<List<Song>> GetAllSongsAsync()
+    {
+        return await http.GetFromJsonAsync<List<Song>>("/api/songs") ?? [];
+    }
+
     public async Task<List<Song>> GetRecentSongsAsync()
     {
         var songs = await http.GetFromJsonAsync<List<Song>>("/api/songs");

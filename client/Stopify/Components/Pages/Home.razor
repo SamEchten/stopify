@@ -2,9 +2,11 @@
 @using Stopify.Models.Music
 @using Stopify.Services.Music
 @using Stopify.Services.Auth
+@using Stopify.Services.Player
 @inject ISongService SongService
 @inject IPlaylistService PlaylistService
 @inject IAuthStateService AuthState
+@inject IPlayerStateService Player
 
 <div class="hero">
     <div class="hero-content">
@@ -28,7 +30,7 @@
         @foreach (var song in songs)
         {
             <div class="song-row">
-                <button class="song-play-btn">
+                <button class="song-play-btn" @onclick="() => Player.Play(song)">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="20" height="20">
                         <path d="M8 5v14l11-7z"/>
                     </svg>
@@ -59,6 +61,7 @@
                             }
                             else
                             {
+                                <button class="menu-item" @onclick="() => AddToQueue(song)">Add to queue</button>
                                 <button class="menu-item" @onclick="() => showingPlaylistsForSong = song.Id">Add to playlist</button>
                             }
                         </div>
@@ -98,6 +101,12 @@
     private async Task AddToPlaylist(int songId, int playlistId)
     {
         await PlaylistService.AddSongToPlaylistAsync(playlistId, songId);
+        CloseMenu();
+    }
+
+    private void AddToQueue(Song song)
+    {
+        Player.AddToQueue(song);
         CloseMenu();
     }
 }
