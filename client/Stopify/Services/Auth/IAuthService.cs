@@ -6,4 +6,5 @@ public interface IAuthService
     Task LogoutAsync();
     Task RegisterUserAsync(string username, string email, string password);
     Task RegisterArtistAsync(string username, string artistName, string email, string password);
+    Task<bool> ChangePasswordAsync(string currentPassword, string newPassword);
 }

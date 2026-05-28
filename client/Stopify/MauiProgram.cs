@@ -38,7 +38,7 @@ namespace Stopify
             builder.Services.AddSingleton(httpHandler);
             builder.Services.AddScoped(sp => new HttpClient(sp.GetRequiredService<HttpClientHandler>(), disposeHandler: false)
             {
-                BaseAddress = new Uri("http://localhost:8080")
+                BaseAddress = new Uri("http://localhost:5232")
             });
 
             builder.Services.AddSingleton<IAuthStateService, AuthStateService>();
@@ -47,6 +47,7 @@ namespace Stopify
             builder.Services.AddSingleton<ISessionSyncService, SessionSyncService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ISongService, SongService>();
+            builder.Services.AddScoped<IAlbumService, AlbumService>();
             builder.Services.AddScoped<IArtistService, ArtistService>();
             builder.Services.AddScoped<IPlaylistService, PlaylistService>();
             builder.Services.AddScoped<ISessionService, SessionService>();

@@ -1,10 +1,11 @@
 ﻿using Stopify.Exceptions.Users;
 using Stopify.Repositories.Users;
 using Stopify.Entities.Users;
+using Stopify.Services.Auth;
 
 namespace Stopify.Services.Users;
 
-public class UserService(UserRepository userRepository, UserFactory userFactory) : IService
+public class UserService(UserRepository userRepository, UserFactory userFactory, HashingService hashingService) : IService
 {
     public User CreateUser(string username, string email, string password)
     {
@@ -33,5 +34,17 @@ public class UserService(UserRepository userRepository, UserFactory userFactory)
     public bool UserExists(int id)
     {
         return userRepository.GetById(id) != null;
+    }
+
+    public bool ChangePassword(int userId, string currentPassword, string newPassword)
+    {
+        var user = userRepository.GetById(userId);
+        if (user == null) return false;
+
+        if (user.Password != hashingService.HashPassword(currentPassword)) return false;
+
+        user.Password = hashingService.HashPassword(newPassword);
+        userRepository.Save();
+        return true;
     }
 }

@@ -6,6 +6,14 @@ namespace Stopify.Repositories.Music;
 
 public class AlbumRepository(ApplicationDbContext context) : EntityRepository<Album>(context)
 {
+    public new Album? GetById(int id)
+    {
+        return DbSet
+            .Include(a => a.Artist)
+            .Include(a => a.Songs)
+            .SingleOrDefault(a => a.Id == id);
+    }
+
     public ICollection<AlbumDTO> GetByArtistId(int artistId)
     {
         return DbSet

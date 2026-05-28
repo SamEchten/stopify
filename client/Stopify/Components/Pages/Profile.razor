@@ -1,3 +1,148 @@
 @page "/profile"
+@using Stopify.Services.Auth
+@inject IAuthStateService AuthState
+@inject IAuthService AuthService
 
-<h1>Profile</h1>
+<div class="hero">
+    <div class="hero-content">
+        <div class="avatar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="40" height="40">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+        </div>
+        <div class="hero-info">
+            <div class="hero-name-row">
+                <h1 class="hero-name">@AuthState.Username</h1>
+                <span class="role-badge @(AuthState.Role == "Artist" ? "role-badge--artist" : "")">
+                    @AuthState.Role
+                </span>
+            </div>
+            <p class="hero-email">@AuthState.Email</p>
+        </div>
+    </div>
+</div>
+
+<div class="profile-body">
+
+    <section class="profile-section">
+        <h2 class="section-title">Account info</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Username</span>
+                <span class="info-value">@AuthState.Username</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">@AuthState.Email</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Role</span>
+                <span class="info-value">@AuthState.Role</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-section">
+        <h2 class="section-title">Change password</h2>
+        <div class="password-form">
+            <div class="form-field">
+                <label class="field-label">Current password</label>
+                <input class="field-input @(currentPasswordError != null ? "field-input--error" : "")"
+                       type="password"
+                       placeholder="Enter current password"
+                       @bind="currentPassword"
+                       @bind:event="oninput" />
+                @if (currentPasswordError != null)
+                {
+                    <span class="field-error">@currentPasswordError</span>
+                }
+            </div>
+            <div class="form-field">
+                <label class="field-label">New password</label>
+                <input class="field-input @(newPasswordError != null ? "field-input--error" : "")"
+                       type="password"
+                       placeholder="Enter new password"
+                       @bind="newPassword"
+                       @bind:event="oninput" />
+                @if (newPasswordError != null)
+                {
+                    <span class="field-error">@newPasswordError</span>
+                }
+            </div>
+            <div class="form-field">
+                <label class="field-label">Confirm new password</label>
+                <input class="field-input @(confirmPasswordError != null ? "field-input--error" : "")"
+                       type="password"
+                       placeholder="Confirm new password"
+                       @bind="confirmPassword"
+                       @bind:event="oninput" />
+                @if (confirmPasswordError != null)
+                {
+                    <span class="field-error">@confirmPasswordError</span>
+                }
+            </div>
+
+            @if (successMessage != null)
+            {
+                <p class="success-message">@successMessage</p>
+            }
+
+            <button class="save-btn" @onclick="ChangePassword" disabled="@isSaving">
+                @(isSaving ? "Saving..." : "Save new password")
+            </button>
+        </div>
+    </section>
+
+</div>
+
+@code {
+    private string currentPassword = "";
+    private string newPassword = "";
+    private string confirmPassword = "";
+
+    private string? currentPasswordError;
+    private string? newPasswordError;
+    private string? confirmPasswordError;
+    private string? successMessage;
+    private bool isSaving;
+
+    private async Task ChangePassword()
+    {
+        currentPasswordError = null;
+        newPasswordError = null;
+        confirmPasswordError = null;
+        successMessage = null;
+
+        if (string.IsNullOrWhiteSpace(currentPassword))
+        {
+            currentPasswordError = "Current password is required.";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 6)
+        {
+            newPasswordError = "New password must be at least 6 characters.";
+            return;
+        }
+        if (newPassword != confirmPassword)
+        {
+            confirmPasswordError = "Passwords do not match.";
+            return;
+        }
+
+        isSaving = true;
+        var success = await AuthService.ChangePasswordAsync(currentPassword, newPassword);
+        isSaving = false;
+
+        if (success)
+        {
+            successMessage = "Password changed successfully.";
+            currentPassword = "";
+            newPassword = "";
+            confirmPassword = "";
+        }
+        else
+        {
+            currentPasswordError = "Current password is incorrect.";
+        }
+    }
+}

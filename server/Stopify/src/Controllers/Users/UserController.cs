@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stopify.Attribute.Auth;
 using Stopify.Entities.Users.DTO;
@@ -13,6 +14,35 @@ namespace Stopify.Controllers.Users;
 [Route("api/users")]
 public class UserController(UserRepository userRepository, UserService userService) : ControllerBase
 {
+    [Authorize]
+    [HttpGet("me", Name = "GetMe")]
+    public ActionResult<UserProfileDTO> GetMe()
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var user = userRepository.GetById(userId);
+        if (user == null) return NotFound();
+
+        var dto = new UserProfileDTO(
+            user.Id,
+            user.Username,
+            user.Email,
+            user.Roles.Select(r => r.Name).ToList(),
+            user.CreatedAt
+        );
+
+        return Ok(dto);
+    }
+
+    [Authorize]
+    [HttpPost("change-password", Name = "ChangePassword")]
+    public ActionResult ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var success = userService.ChangePassword(userId, request.CurrentPassword, request.NewPassword);
+        if (!success) return BadRequest(new { message = "Current password is incorrect." });
+        return Ok();
+    }
+
     [Authorize]
     [AuthorizeUser]
     [HttpGet("{userId:int}", Name = "GetUser")]

@@ -44,7 +44,7 @@ public class AuthController(AuthService authService): ControllerBase
 
         var token  = Request.Cookies["Stopify-RefreshToken"];
 
-        if (string.IsNullOrEmpty(token) || authService.ValidateRefreshToken(token))
+        if (string.IsNullOrEmpty(token) || !authService.ValidateRefreshToken(token))
         {
             return Unauthorized(new { message = "Invalid refresh token provided" });
         }

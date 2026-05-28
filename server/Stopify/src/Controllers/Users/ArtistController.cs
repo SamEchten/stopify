@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Stopify.DTO.Music;
 using Stopify.Entities.Users;
 using Stopify.Repositories.Music;
@@ -12,6 +14,15 @@ namespace Stopify.Controllers.Users;
 [Route("api/artists")]
 public class ArtistController(ArtistService artistService, ArtistRepository artistRepository, SongRepository songRepository, AlbumRepository albumRepository) : ControllerBase
 {
+    [Authorize]
+    [HttpGet("me", Name = "GetMyArtist")]
+    public ActionResult<Artist> GetMe()
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var artist = artistRepository.GetByUserId(userId);
+        return artist == null ? NotFound() : Ok(artist);
+    }
+
     [HttpPost(Name = "CreateArtist")]
     public ActionResult<Artist> CreateArtist(CreateArtistRequest request)
     {

@@ -1,3 +1,16 @@
+@keyframes bgShift {
+    0%   { background-position: 0% 0%; }
+    25%  { background-position: 100% 0%; }
+    50%  { background-position: 100% 100%; }
+    75%  { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+@keyframes ringPulse {
+    0%   { scale: 0.3; opacity: 1; }
+    100% { scale: 2.4; opacity: 0; }
+}
+
 /* ── No session state ── */
 .no-session {
     display: flex;
@@ -5,7 +18,36 @@
     justify-content: center;
     min-height: 100vh;
     padding: 40px;
-    background-color: #2a2a2a;
+    background: linear-gradient(135deg, #121212, #0c1a0f, #121212, #0e1c14, #111111, #0b180e, #121212);
+    background-size: 400% 400%;
+    animation: bgShift 14s ease-in-out infinite;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.no-session::before,
+.no-session::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 100%;
+    aspect-ratio: 1;
+    background: radial-gradient(circle,
+        transparent 19.5%, rgba(255,255,255,0.07) 20%, transparent 20.5%,
+        transparent 34.5%, rgba(255,255,255,0.05) 35%, transparent 35.5%,
+        transparent 49.5%, rgba(255,255,255,0.04) 50%, transparent 50.5%,
+        transparent 64.5%, rgba(255,255,255,0.03) 65%, transparent 65.5%
+    );
+    animation: ringPulse 22s ease-out infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.no-session::after {
+    animation-delay: -11s;
 }
 
 .no-session-content {
@@ -292,9 +334,38 @@
 
 /* ── Song list ── */
 .song-list-section {
-    background-color: #2a2a2a;
+    background: linear-gradient(135deg, #121212, #0c1a0f, #121212, #0e1c14, #111111, #0b180e, #121212);
+    background-size: 400% 400%;
+    animation: bgShift 14s ease-in-out infinite;
     min-height: calc(100vh - 220px);
     padding: 0 24px 24px;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.song-list-section::before,
+.song-list-section::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 100%;
+    aspect-ratio: 1;
+    background: radial-gradient(circle,
+        transparent 19.5%, rgba(255,255,255,0.07) 20%, transparent 20.5%,
+        transparent 34.5%, rgba(255,255,255,0.05) 35%, transparent 35.5%,
+        transparent 49.5%, rgba(255,255,255,0.04) 50%, transparent 50.5%,
+        transparent 64.5%, rgba(255,255,255,0.03) 65%, transparent 65.5%
+    );
+    animation: ringPulse 22s ease-out infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.song-list-section::after {
+    animation-delay: -11s;
 }
 
 .song-list-header {

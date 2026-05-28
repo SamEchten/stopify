@@ -1,9 +1,10 @@
 using System.Net.Http.Json;
 using Stopify.Models.Auth;
+using Stopify.Models.Music;
 
 namespace Stopify.Services.Auth;
 
-public class AuthService(HttpClient http) : IAuthService
+public class AuthService(HttpClient http, IAuthStateService authState) : IAuthService
 {
     public async Task<bool> LoginAsync(string email, string password)
     {
@@ -13,7 +14,22 @@ public class AuthService(HttpClient http) : IAuthService
             Password = password
         });
 
-        return response.IsSuccessStatusCode;
+        if (!response.IsSuccessStatusCode) return false;
+
+        var profile = await http.GetFromJsonAsync<UserProfile>("/api/users/me");
+        if (profile != null)
+        {
+            var role = profile.Roles.Contains("Artist") ? "Artist" : "User";
+            int? artistId = null;
+            if (role == "Artist")
+            {
+                var artist = await http.GetFromJsonAsync<Artist>("/api/artists/me");
+                artistId = artist?.Id;
+            }
+            authState.SetUserInfo(profile.Id, profile.Username, profile.Email, role, artistId);
+        }
+
+        return true;
     }
 
     public async Task LogoutAsync()
@@ -42,5 +58,15 @@ public class AuthService(HttpClient http) : IAuthService
         ]);
         var response = await http.PostAsync("/api/artists", content);
         response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<bool> ChangePasswordAsync(string currentPassword, string newPassword)
+    {
+        var response = await http.PostAsJsonAsync("/api/users/change-password", new
+        {
+            currentPassword,
+            newPassword
+        });
+        return response.IsSuccessStatusCode;
     }
 }
