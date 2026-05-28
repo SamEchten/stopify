@@ -17,7 +17,7 @@
             cookie.Expired = true;
         }
 
-        AuthState.SetAuthenticated(false);
+        AuthState.Clear();
         Nav.NavigateTo("/login");
     }
 }

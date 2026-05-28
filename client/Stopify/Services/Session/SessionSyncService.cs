@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.SignalR.Client;
 using Stopify.Models.Music;
@@ -22,18 +23,24 @@ public class SessionSyncService : ISessionSyncService
     public event Action? OnStateChanged;
     public event Action<double>? SeekRequested;
 
-    public SessionSyncService(HttpClientHandler httpHandler, IPlayerStateService player, ISessionStateService sessionState)
+    public SessionSyncService(HttpClientHandler httpHandler, CookieContainer cookieContainer, IPlayerStateService player, ISessionStateService sessionState)
     {
         _player = player;
         _sessionState = sessionState;
         _httpClient = new HttpClient(httpHandler, disposeHandler: false)
         {
-            BaseAddress = new Uri("http://localhost:8080")
+            BaseAddress = new Uri("http://localhost:5232")
         };
         _connection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:8080/sessionhub", options =>
+            .WithUrl("http://localhost:5232/sessionhub", options =>
             {
-                options.HttpMessageHandlerFactory = _ => httpHandler;
+                // Give SignalR its own handler so it can dispose it without
+                // affecting the shared httpHandler used for REST calls.
+                options.HttpMessageHandlerFactory = _ => new HttpClientHandler
+                {
+                    CookieContainer = cookieContainer,
+                    UseCookies = true
+                };
             })
             .WithAutomaticReconnect()
             .Build();

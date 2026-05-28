@@ -30,7 +30,7 @@ public class PlaylistController(PlaylistRepository playlistRepository, PlaylistF
         return Ok(playlist);
     }
 
-    [HttpGet(Name = "GetPLaylists")]
+    [HttpGet(Name = "GetPlaylists")]
     public ActionResult<ICollection<Playlist>> GetPlaylists()
     {
         var playlists = playlistRepository.GetAll();
@@ -49,7 +49,7 @@ public class PlaylistController(PlaylistRepository playlistRepository, PlaylistF
         return Ok(playlists);
     }
 
-    [HttpGet("{playlistId:int}", Name = "GetPLaylist")]
+    [HttpGet("{playlistId:int}", Name = "GetPlaylist")]
     public ActionResult<Playlist> GetPlaylist(int playlistId)
     {
         var playlist = playlistRepository.GetById(playlistId);
@@ -80,13 +80,13 @@ public class PlaylistController(PlaylistRepository playlistRepository, PlaylistF
         return playlist;
     }
 
-    [HttpDelete("{playlistId:int}", Name = "RemoveSong")]
+    [HttpDelete("{playlistId:int}", Name = "DeletePlaylist")]
     public ActionResult DeletePlaylist(int playlistId)
     {
         var playlist = playlistRepository.Find(playlistId);
         if (playlist == null)
         {
-            return NotFound($"Playlist with id {playlist} not found");
+            return NotFound($"Playlist with id {playlistId} not found");
         }
 
         playlistRepository.Delete(playlistId);
@@ -100,13 +100,13 @@ public class PlaylistController(PlaylistRepository playlistRepository, PlaylistF
         var playlist = playlistRepository.GetById(playlistId);
         if (playlist == null)
         {
-            return NotFound($"Playlist with id {playlist} not found");
+            return NotFound($"Playlist with id {playlistId} not found");
         }
 
         var song = songRepository.Find(songId);
         if (song == null)
         {
-            return NotFound($"Song with id {song} not found");
+            return NotFound($"Song with id {songId} not found");
         }
 
         playlist.DeleteSong(song);

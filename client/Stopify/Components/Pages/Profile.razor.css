@@ -1,0 +1,212 @@
+.hero {
+    width: 100%;
+    background-image: url("images/hero_bg.png");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 40px 48px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 100%);
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background-color: rgba(255,255,255,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.15);
+}
+
+.hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hero-name-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hero-name {
+    color: white;
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.role-badge {
+    background-color: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    align-self: center;
+}
+
+.role-badge--artist {
+    background-color: #1db954;
+    color: white;
+}
+
+.hero-email {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* ── Body ── */
+.profile-body {
+    background-color: #1e1e1e;
+    min-height: calc(100vh - 220px);
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 520px;
+}
+
+.section-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* ── Info grid ── */
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.info-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.info-value {
+    color: white;
+    font-size: 0.95rem;
+}
+
+/* ── Password form ── */
+.password-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-label {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.field-input {
+    background-color: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.field-input:focus {
+    border-color: #1db954;
+}
+
+.field-input--error {
+    border-color: rgba(255,107,107,0.7);
+}
+
+.field-input::placeholder {
+    color: rgba(255,255,255,0.25);
+}
+
+.field-error {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+}
+
+.success-message {
+    color: #1db954;
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+.save-btn {
+    margin-top: 4px;
+    align-self: flex-start;
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 11px 28px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
+}
+
+.save-btn:hover:not(:disabled) {
+    background-color: #1ed760;
+    transform: scale(1.03);
+}
+
+.save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}

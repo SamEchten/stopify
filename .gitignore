@@ -10,6 +10,9 @@
 appsettings.json
 appsettings.*.json
 
+# Local launch config
+**/launchSettings.json
+
 # User-specific files
 *.rsuser
 *.suo

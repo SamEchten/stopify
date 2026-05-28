@@ -1,5 +1,14 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
+.artist-studio-link,
+.artist-studio-link:hover,
+.artist-studio-link:visited,
+.artist-studio-link:active {
+    color: #1db954 !important;
+    text-decoration: none !important;
+    font-weight: 700;
+}
+
 .song-play-btn {
     flex-shrink: 0;
     width: 48px;

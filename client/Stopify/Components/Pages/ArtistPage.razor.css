@@ -1,0 +1,403 @@
+.no-access {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: rgba(255,255,255,0.5);
+    background: #1e1e1e;
+}
+
+/* ── Hero ── */
+.hero {
+    width: 100%;
+    background-image: url("images/hero_bg.png");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 36px 48px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    min-height: 180px;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.2) 100%);
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    width: 100%;
+}
+
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.hero-title {
+    color: white;
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.hero-sub {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.artist-badge {
+    background-color: #1db954;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+}
+
+/* ── Body ── */
+.studio-body {
+    background-color: #1e1e1e;
+    min-height: calc(100vh - 180px);
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+}
+
+.studio-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.section-title {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* ── Buttons ── */
+.green-btn {
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
+    white-space: nowrap;
+}
+
+.green-btn:hover:not(:disabled) {
+    background-color: #1ed760;
+    transform: scale(1.03);
+}
+
+.green-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Form card ── */
+.form-card {
+    background-color: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 480px;
+}
+
+.form-card--inline {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    max-width: 400px;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-label {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.field-input {
+    background-color: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: white;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    padding: 9px 14px;
+    outline: none;
+    flex: 1;
+    transition: border-color 0.2s;
+}
+
+.field-input:focus {
+    border-color: #1db954;
+}
+
+.field-input::placeholder {
+    color: rgba(255,255,255,0.25);
+}
+
+.file-input {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ── Status ── */
+.error-text {
+    color: #ff6b6b;
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.success-text {
+    color: #1db954;
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.loading-text,
+.empty-text {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 8px 0;
+}
+
+.empty-text--indent {
+    padding-left: 16px;
+    font-size: 0.85rem;
+}
+
+/* ── Album card ── */
+.album-card {
+    background-color: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.album-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.album-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.album-icon {
+    color: #1db954;
+    flex-shrink: 0;
+}
+
+.album-title {
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.song-count {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.8rem;
+}
+
+.album-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-song-btn {
+    background-color: transparent;
+    border: 1px solid rgba(29,185,84,0.5);
+    color: #1db954;
+    border-radius: 16px;
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+
+.add-song-btn:hover {
+    background-color: rgba(29,185,84,0.1);
+    border-color: #1db954;
+}
+
+.delete-album-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(255,255,255,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.delete-album-btn:hover {
+    color: #ff6b6b;
+    background-color: rgba(255,107,107,0.1);
+}
+
+/* ── Add song panel ── */
+.add-song-panel {
+    background-color: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.add-song-label {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 8px;
+}
+
+.add-song-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.add-song-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 0.88rem;
+    font-family: 'Poppins', sans-serif;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.add-song-item:hover {
+    background-color: rgba(255,255,255,0.07);
+}
+
+.add-song-empty {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    margin: 0;
+}
+
+/* ── Song list ── */
+.song-list {
+    display: flex;
+    flex-direction: column;
+    padding-top: 4px;
+}
+
+.song-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.song-row:last-child {
+    border-bottom: none;
+}
+
+.song-index {
+    width: 24px;
+    text-align: right;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.song-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+}
+
+.song-name {
+    color: white;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-duration {
+    color: rgba(255,255,255,0.35);
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
