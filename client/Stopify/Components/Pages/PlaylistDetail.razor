@@ -102,10 +102,13 @@
     private List<Playlist> userPlaylists = [];
     private int? openMenuId;
     private int? showingPlaylistsForSong;
+    private int _loadedId;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        if (!AuthState.IsAuthenticated) return;
+        if (!AuthState.IsAuthenticated || Id == _loadedId) return;
+        _loadedId = Id;
+        playlist = null;
         playlist = await PlaylistService.GetPlaylistAsync(Id);
         userPlaylists = await PlaylistService.GetUserPlaylistsAsync();
     }
