@@ -301,3 +301,19 @@
     inset: 0;
     z-index: 99;
 }
+
+@media (max-width: 640.98px) {
+    .search-wrap {
+        width: 100%;
+    }
+
+    .top-bar {
+        padding: 10px 12px;
+    }
+
+    .search-dropdown {
+        width: calc(100vw - 24px);
+        left: 0;
+        right: 0;
+    }
+}
