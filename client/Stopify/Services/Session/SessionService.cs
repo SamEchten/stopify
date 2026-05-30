@@ -30,6 +30,17 @@ public class SessionService(HttpClient http) : ISessionService
         catch { return null; }
     }
 
+    public async Task<List<SessionMember>> GetMembersAsync(string sessionId)
+    {
+        var response = await http.GetAsync($"/api/sessions/{Uri.EscapeDataString(sessionId)}/members");
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"GET /members returned {(int)response.StatusCode}: {body}");
+        }
+        return await response.Content.ReadFromJsonAsync<List<SessionMember>>() ?? [];
+    }
+
     public async Task<bool> AddToQueueAsync(string sessionId, int songId)
     {
         var response = await http.PostAsJsonAsync($"/api/sessions/{Uri.EscapeDataString(sessionId)}/queue", new { SongId = songId });

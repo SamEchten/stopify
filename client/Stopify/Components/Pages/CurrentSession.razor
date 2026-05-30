@@ -102,6 +102,7 @@ else
         </div>
     </div>
 
+    <div class="session-body">
     <div class="song-list-section">
         <div class="song-list-header">
             <span class="col-title">Queue</span>
@@ -191,11 +192,39 @@ else
             }
         }
     </div>
+
+    <div class="members-panel">
+        <div class="members-header">Members</div>
+        <div class="members-list">
+            @foreach (var member in members)
+            {
+                <div class="member-row">
+                    <span class="member-name">@member.Username</span>
+                    @if (member.IsHost)
+                    {
+                        <span class="host-badge">Host</span>
+                    }
+                </div>
+            }
+            @if (membersError != null)
+            {
+                <p class="members-empty">@membersError</p>
+            }
+            else if (members.Count == 0)
+            {
+                <p class="members-empty">No members yet.</p>
+            }
+        </div>
+    </div>
+    </div>
+
 }
 
 @code {
     private SessionInfo? session;
     private SessionQueue? sessionQueue;
+    private List<SessionMember> members = [];
+    private string? membersError = null;
     private Dictionary<int, Song> songLookup = [];
     private List<Song> allSongs = [];
 
@@ -242,17 +271,29 @@ else
     private async Task LoadSession()
     {
         isLoading = true;
+        membersError = null;
         var sessionId = SessionState.CurrentSessionId!;
 
-        var (sessionResult, queueResult, songsResult) = (
-            await SessionService.GetSessionAsync(sessionId),
-            await SessionService.GetQueueAsync(sessionId),
-            await SongService.GetAllSongsAsync()
-        );
+        var sessionTask = SessionService.GetSessionAsync(sessionId);
+        var queueTask = SessionService.GetQueueAsync(sessionId);
+        var songsTask = SongService.GetAllSongsAsync();
 
-        session = sessionResult;
-        sessionQueue = queueResult;
-        allSongs = songsResult;
+        try
+        {
+            var membersTask = SessionService.GetMembersAsync(sessionId);
+            await Task.WhenAll(sessionTask, queueTask, songsTask, membersTask);
+            members = membersTask.Result;
+        }
+        catch (Exception ex)
+        {
+            await Task.WhenAll(sessionTask, queueTask, songsTask);
+            members = [];
+            membersError = ex.Message;
+        }
+
+        session = sessionTask.Result;
+        sessionQueue = queueTask.Result;
+        allSongs = songsTask.Result;
         songLookup = allSongs.ToDictionary(s => s.Id);
 
         isLoading = false;
@@ -318,7 +359,13 @@ else
         InvokeAsync(async () =>
         {
             if (SessionState.CurrentSessionId != null)
-                sessionQueue = await SessionService.GetQueueAsync(SessionState.CurrentSessionId);
+            {
+                var queueTask = SessionService.GetQueueAsync(SessionState.CurrentSessionId);
+                var membersTask = SessionService.GetMembersAsync(SessionState.CurrentSessionId);
+                await Task.WhenAll(queueTask, membersTask);
+                sessionQueue = queueTask.Result;
+                members = membersTask.Result;
+            }
             StateHasChanged();
         });
     }

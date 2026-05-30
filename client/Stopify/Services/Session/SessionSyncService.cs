@@ -32,7 +32,7 @@ public class SessionSyncService : ISessionSyncService
             BaseAddress = new Uri("http://localhost:8080")
         };
         _connection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5232/sessionhub", options =>
+            .WithUrl("http://localhost:8080/sessionhub", options =>
             {
                 // Give SignalR its own handler so it can dispose it without
                 // affecting the shared httpHandler used for REST calls.
@@ -103,6 +103,9 @@ public class SessionSyncService : ISessionSyncService
             _sessionState.ClearSession();
             OnStateChanged?.Invoke();
         });
+
+        _connection.On<int>("UserJoined", _ => OnStateChanged?.Invoke());
+        _connection.On<int>("UserLeft", _ => OnStateChanged?.Invoke());
     }
 
     public async Task ConnectAsync(string sessionId)
