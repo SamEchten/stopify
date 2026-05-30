@@ -6,12 +6,24 @@
 @inject IPlaylistService PlaylistService
 @inject IAuthStateService AuthState
 @inject IPlayerStateService Player
+@inject NavigationManager Nav
 
 <div class="hero">
     <div class="hero-content">
         <h1 class="hero-title">@(playlist?.Title ?? "Playlist")</h1>
         <p class="hero-subtitle">@(playlist?.Songs.Count ?? 0) songs</p>
     </div>
+    <button class="delete-playlist-btn" @onclick="() => showDeleteConfirm = true" title="Delete playlist">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             width="22" height="22">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+        </svg>
+    </button>
 </div>
 
 <div class="song-list-section">
@@ -95,6 +107,20 @@
     <div class="menu-backdrop" @onclick="CloseMenu"></div>
 }
 
+@if (showDeleteConfirm)
+{
+    <div class="modal-backdrop" @onclick="() => showDeleteConfirm = false">
+        <div class="confirm-modal" @onclick:stopPropagation>
+            <h2 class="confirm-modal-title">Delete playlist</h2>
+            <p class="confirm-modal-body">Are you sure you want to delete "<strong>@playlist?.Title</strong>"? This cannot be undone.</p>
+            <div class="confirm-modal-actions">
+                <button class="modal-btn modal-btn-cancel" @onclick="() => showDeleteConfirm = false">Cancel</button>
+                <button class="modal-btn modal-btn-delete" @onclick="DeletePlaylist">Delete</button>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter] public int Id { get; set; }
 
@@ -103,6 +129,7 @@
     private int? openMenuId;
     private int? showingPlaylistsForSong;
     private int _loadedId;
+    private bool showDeleteConfirm;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -131,5 +158,11 @@
     {
         await PlaylistService.RemoveSongFromPlaylistAsync(Id, songId);
         playlist?.Songs.Remove(playlist.Songs.First(s => s.Id == songId));
+    }
+
+    private async Task DeletePlaylist()
+    {
+        await PlaylistService.DeletePlaylistAsync(Id);
+        Nav.NavigateTo("/playlists");
     }
 }

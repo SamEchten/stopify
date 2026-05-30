@@ -10,4 +10,5 @@ public interface IPlaylistService
     Task<Playlist?> GetPlaylistAsync(int id);
     Task AddSongToPlaylistAsync(int playlistId, int songId);
     Task RemoveSongFromPlaylistAsync(int playlistId, int songId);
+    Task DeletePlaylistAsync(int playlistId);
 }
