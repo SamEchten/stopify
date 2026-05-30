@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Stopify.Hubs;
+using Stopify.Repositories.Users;
 using Stopify.Requests.Session;
 using Stopify.Services.Session;
 
@@ -11,7 +12,7 @@ namespace Stopify.Controllers.Session;
 [Authorize]
 [ApiController]
 [Route("/api/sessions")]
-public class SessionController(SessionStore sessionStore, IHubContext<SessionHub> hubContext) : ControllerBase
+public class SessionController(SessionStore sessionStore, IHubContext<SessionHub> hubContext, UserRepository userRepository) : ControllerBase
 {
     private int GetUserId() =>
         int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -112,6 +113,21 @@ public class SessionController(SessionStore sessionStore, IHubContext<SessionHub
         }
 
         return Ok();
+    }
+
+    [HttpGet("{sessionId}/members")]
+    public ActionResult GetMembers(string sessionId)
+    {
+        var session = sessionStore.Get(sessionId);
+        if (session == null) return NotFound();
+
+        var memberIds = session.MemberUserIds;
+        var members = userRepository.GetAll()
+            .Where(u => memberIds.Contains(u.Id))
+            .Select(u => new { u.Id, u.Username, IsHost = u.Id == session.HostUserId })
+            .ToList();
+
+        return Ok(members);
     }
 
     [HttpGet("{sessionId}/queue")]

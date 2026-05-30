@@ -332,16 +332,69 @@
     letter-spacing: 0.04em;
 }
 
+/* ── Session body (queue + members sidebar) ── */
+.session-body {
+    display: flex;
+    align-items: stretch;
+    min-height: calc(100vh - 220px);
+}
+
 /* ── Song list ── */
 .song-list-section {
+    flex: 1;
+    min-width: 0;
     background: linear-gradient(135deg, #121212, #0c1a0f, #121212, #0e1c14, #111111, #0b180e, #121212);
     background-size: 400% 400%;
     animation: bgShift 14s ease-in-out infinite;
-    min-height: calc(100vh - 220px);
     padding: 0 24px 24px;
     position: relative;
     isolation: isolate;
     overflow: hidden;
+}
+
+/* ── Members sidebar ── */
+.members-panel {
+    width: 240px;
+    flex-shrink: 0;
+    background-color: #181818;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding: 20px 16px;
+    box-sizing: border-box;
+}
+
+.members-header {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+}
+
+.members-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.member-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.member-name {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.88rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.members-empty {
+    color: rgba(255,255,255,0.3);
+    font-size: 0.85rem;
+    margin: 0;
 }
 
 .song-list-section::before,

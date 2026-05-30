@@ -8,6 +8,7 @@ public interface ISessionService
     Task<bool> JoinSessionAsync(string sessionId);
     Task<SessionInfo?> GetSessionAsync(string sessionId);
     Task<SessionQueue?> GetQueueAsync(string sessionId);
+    Task<List<SessionMember>> GetMembersAsync(string sessionId);
     Task<bool> AddToQueueAsync(string sessionId, int songId);
     Task<bool> RemoveFromQueueAsync(string sessionId, int index);
     Task<bool> LeaveSessionAsync(string sessionId);
