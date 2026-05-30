@@ -39,24 +39,13 @@ public class AuthService(HttpClient http, IAuthStateService authState) : IAuthSe
 
     public async Task RegisterUserAsync(string username, string email, string password)
     {
-        var content = new FormUrlEncodedContent([
-            new("username", username),
-            new("email", email),
-            new("password", password)
-        ]);
-        var response = await http.PostAsync("/api/users", content);
+        var response = await http.PostAsJsonAsync("/api/users", new { username, email, password });
         response.EnsureSuccessStatusCode();
     }
 
     public async Task RegisterArtistAsync(string username, string artistName, string email, string password)
     {
-        var content = new FormUrlEncodedContent([
-            new("username", username),
-            new("artistName", artistName),
-            new("email", email),
-            new("password", password)
-        ]);
-        var response = await http.PostAsync("/api/artists", content);
+        var response = await http.PostAsJsonAsync("/api/artists", new { username, artistName, email, password });
         response.EnsureSuccessStatusCode();
     }
 

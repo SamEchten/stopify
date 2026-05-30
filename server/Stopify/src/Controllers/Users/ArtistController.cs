@@ -24,7 +24,7 @@ public class ArtistController(ArtistService artistService, ArtistRepository arti
     }
 
     [HttpPost(Name = "CreateArtist")]
-    public ActionResult<Artist> CreateArtist(CreateArtistRequest request)
+    public ActionResult<Artist> CreateArtist([FromBody] CreateArtistRequest request)
     {
         var artist = artistService.CreateArtist(request.Username, request.ArtistName, request.Email, request.Password);
 
