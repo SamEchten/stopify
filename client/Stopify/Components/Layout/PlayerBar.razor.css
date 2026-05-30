@@ -442,6 +442,21 @@
     background-color: rgba(255,255,255,0.1);
 }
 
+@media (max-width: 640.98px) {
+    .player-volume {
+        display: none;
+    }
+
+    .player-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .player-controls {
+        gap: 4px;
+    }
+}
+
 @media (min-width: 641px) {
     .player-bar {
         left: 280px;
