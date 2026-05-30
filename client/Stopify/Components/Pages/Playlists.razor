@@ -7,8 +7,18 @@
 
 <div class="hero">
     <div class="hero-content">
-        <h1 class="hero-title">Playlists</h1>
-        <p class="hero-subtitle">45 playlists</p>
+        <div class="hero-title-row">
+            <h1 class="hero-title">Playlists</h1>
+            <button class="hero-create-btn" @onclick="ToggleCreateForm">+ New Playlist</button>
+        </div>
+        <p class="hero-subtitle">@playlists.Count playlists</p>
+        @if (showCreateForm)
+        {
+            <div class="hero-create-form">
+                <input class="hero-create-input" type="text" placeholder="Playlist name..." @bind="newPlaylistTitle" @bind:event="oninput" @onkeydown="HandleCreateKeyDown" />
+                <button class="hero-create-submit" @onclick="HandleCreatePlaylist" disabled="@isCreating">+</button>
+            </div>
+        }
     </div>
 </div>
 
@@ -34,10 +44,32 @@
 
 @code {
     private List<Playlist> playlists = [];
+    private string newPlaylistTitle = "";
+    private bool isCreating = false;
+    private bool showCreateForm = false;
+
+    private void ToggleCreateForm() => showCreateForm = !showCreateForm;
 
     protected override async Task OnInitializedAsync()
     {
         if (!AuthState.IsAuthenticated) return;
-        playlists = await PlaylistService.GetUserPlaylistsAsync();
+        playlists = (await PlaylistService.GetUserPlaylistsAsync()).OrderByDescending(p => p.Id).ToList();
+    }
+
+    private async Task HandleCreatePlaylist()
+    {
+        if (string.IsNullOrWhiteSpace(newPlaylistTitle) || isCreating) return;
+        isCreating = true;
+        await PlaylistService.CreatePlaylistAsync(newPlaylistTitle.Trim());
+        newPlaylistTitle = "";
+        showCreateForm = false;
+        playlists = (await PlaylistService.GetUserPlaylistsAsync()).OrderByDescending(p => p.Id).ToList();
+        isCreating = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleCreateKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await HandleCreatePlaylist();
     }
 }

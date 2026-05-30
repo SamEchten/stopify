@@ -4,6 +4,7 @@ namespace Stopify.Services.Music;
 
 public interface IPlaylistService
 {
+    event Action? PlaylistsChanged;
     Task<List<Playlist>> GetUserPlaylistsAsync();
     Task CreatePlaylistAsync(string title);
     Task<Playlist?> GetPlaylistAsync(int id);

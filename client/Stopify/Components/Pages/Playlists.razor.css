@@ -28,6 +28,82 @@
     gap: 6px;
 }
 
+.hero-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.hero-create-btn {
+    background-color: #1db954;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.15s;
+}
+
+.hero-create-btn:hover {
+    background-color: #1ed760;
+}
+
+.hero-create-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.hero-create-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    color: white;
+    font-size: 0.9rem;
+    padding: 2px 6px;
+    outline: none;
+    width: 200px;
+}
+
+.hero-create-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-create-input:focus {
+    border-bottom-color: white;
+}
+
+.hero-create-submit {
+    background-color: #1db954;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    width: 26px;
+    height: 26px;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background-color 0.15s;
+}
+
+.hero-create-submit:hover {
+    background-color: #1ed760;
+}
+
+.hero-create-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .hero-title {
     color: white;
     font-size: 2.4rem;
