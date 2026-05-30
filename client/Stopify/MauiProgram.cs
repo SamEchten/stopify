@@ -38,7 +38,7 @@ namespace Stopify
             builder.Services.AddSingleton(httpHandler);
             builder.Services.AddScoped(sp => new HttpClient(sp.GetRequiredService<HttpClientHandler>(), disposeHandler: false)
             {
-                BaseAddress = new Uri("http://localhost:5232")
+                BaseAddress = new Uri("http://localhost:8080")
             });
 
             builder.Services.AddSingleton<IAuthStateService, AuthStateService>();

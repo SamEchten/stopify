@@ -29,7 +29,7 @@ public class SessionSyncService : ISessionSyncService
         _sessionState = sessionState;
         _httpClient = new HttpClient(httpHandler, disposeHandler: false)
         {
-            BaseAddress = new Uri("http://localhost:5232")
+            BaseAddress = new Uri("http://localhost:8080")
         };
         _connection = new HubConnectionBuilder()
             .WithUrl("http://localhost:5232/sessionhub", options =>
