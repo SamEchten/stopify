@@ -5,6 +5,8 @@ namespace Stopify.Services.Music;
 
 public class PlaylistService(HttpClient http) : IPlaylistService
 {
+    public event Action? PlaylistsChanged;
+
     public async Task<List<Playlist>> GetUserPlaylistsAsync()
     {
         var playlists = await http.GetFromJsonAsync<List<Playlist>>("/api/playlists/get-by-user");
@@ -15,6 +17,7 @@ public class PlaylistService(HttpClient http) : IPlaylistService
     {
         var response = await http.PostAsync($"/api/playlists?title={Uri.EscapeDataString(title)}", null);
         response.EnsureSuccessStatusCode();
+        PlaylistsChanged?.Invoke();
     }
 
     public async Task<Playlist?> GetPlaylistAsync(int id)

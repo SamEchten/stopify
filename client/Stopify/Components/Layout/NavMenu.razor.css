@@ -157,59 +157,6 @@
     margin: 2px 0 4px;
 }
 
-.nav-clickable {
-    cursor: pointer;
-    user-select: none;
-}
-
-.create-playlist-form {
-    align-items: center;
-}
-
-.create-playlist-input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    font-size: 0.85rem;
-    padding: 2px 4px;
-    outline: none;
-}
-
-.create-playlist-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.create-playlist-input:focus {
-    border-bottom-color: rgba(255, 255, 255, 0.7);
-}
-
-.create-playlist-btn {
-    background-color: #1db954;
-    border: none;
-    border-radius: 50%;
-    color: white;
-    width: 24px;
-    height: 24px;
-    font-size: 1rem;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    padding: 0;
-}
-
-.create-playlist-btn:hover {
-    background-color: #1ed760;
-}
-
-.create-playlist-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
 
 .artist-studio-link {
     color: #1db954;

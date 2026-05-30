@@ -27,18 +27,6 @@
 				</NavLink>
 			</div>
 			<div class="nav-item">
-				<div class="d-flex flex-row text-light gap-3 nav-clickable" @onclick="ToggleCreateForm">
-					<span class="create-icon"></span> Create playlist
-				</div>
-				@if (showCreateForm)
-				{
-					<div class="create-playlist-form d-flex flex-row gap-2 mt-2">
-						<input class="create-playlist-input" type="text" placeholder="Playlist name..." @bind="newPlaylistTitle" @bind:event="oninput" @onkeydown="HandleCreateKeyDown" />
-						<button class="create-playlist-btn" @onclick="HandleCreatePlaylist" disabled="@isCreating">+</button>
-					</div>
-				}
-			</div>
-			<div class="nav-item">
 				<NavLink class="d-flex flex-row text-light gap-3 text-decoration-none" href="/current-session">
 					<span class="persons-icon"></span> Session
 				</NavLink>
@@ -82,15 +70,11 @@
 
 @code {
     private List<Playlist> playlists = [];
-    private string newPlaylistTitle = "";
-    private bool isCreating = false;
-    private bool showCreateForm = false;
-
-    private void ToggleCreateForm() => showCreateForm = !showCreateForm;
 
     protected override async Task OnInitializedAsync()
     {
         AuthState.OnChange += OnAuthStateChanged;
+        PlaylistService.PlaylistsChanged += OnPlaylistsChanged;
         if (!AuthState.IsAuthenticated) return;
         await LoadPlaylists();
     }
@@ -100,9 +84,19 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private void OnPlaylistsChanged()
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadPlaylists();
+            StateHasChanged();
+        });
+    }
+
     public void Dispose()
     {
         AuthState.OnChange -= OnAuthStateChanged;
+        PlaylistService.PlaylistsChanged -= OnPlaylistsChanged;
     }
 
     private async Task LoadPlaylists()
@@ -110,21 +104,4 @@
         var all = await PlaylistService.GetUserPlaylistsAsync();
         playlists = all.OrderByDescending(p => p.Id).Take(5).ToList();
     }
-
-    private async Task HandleCreatePlaylist()
-    {
-        if (string.IsNullOrWhiteSpace(newPlaylistTitle) || isCreating) return;
-        isCreating = true;
-        await PlaylistService.CreatePlaylistAsync(newPlaylistTitle.Trim());
-        newPlaylistTitle = "";
-        showCreateForm = false;
-        await LoadPlaylists();
-        isCreating = false;
-    }
-
-    private async Task HandleCreateKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter") await HandleCreatePlaylist();
-    }
-
 }
