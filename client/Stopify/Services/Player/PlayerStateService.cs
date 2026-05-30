@@ -5,6 +5,7 @@ namespace Stopify.Services.Player;
 public class PlayerStateService : IPlayerStateService
 {
     private readonly List<Song> _queue = [];
+    private readonly List<Song> _history = [];
 
     public Song? CurrentSong { get; private set; }
     public bool IsPlaying { get; private set; }
@@ -12,13 +13,14 @@ public class PlayerStateService : IPlayerStateService
     public int QueueIndex { get; private set; } = -1;
     public int PlayVersion { get; private set; }
     public bool HasNext => _queue.Count > 0;
-    public bool HasPrevious => QueueIndex > 0;
+    public bool HasPrevious => _history.Count > 0;
 
     public event Action? OnChange;
     public event Action? OnQueueChange;
 
     public void Play(Song song)
     {
+        _history.Clear();
         CurrentSong = song;
         IsPlaying = true;
         QueueIndex = -1;
@@ -72,6 +74,8 @@ public class PlayerStateService : IPlayerStateService
     {
         if (_queue.Count > 0)
         {
+            if (CurrentSong != null)
+                _history.Add(CurrentSong);
             CurrentSong = _queue[0];
             _queue.RemoveAt(0);
             IsPlaying = true;
@@ -89,10 +93,14 @@ public class PlayerStateService : IPlayerStateService
 
     public void SkipPrevious()
     {
-        if (QueueIndex <= 0) return;
-        QueueIndex--;
-        CurrentSong = _queue[QueueIndex];
+        if (_history.Count == 0) return;
+        if (CurrentSong != null)
+            _queue.Insert(0, CurrentSong);
+        CurrentSong = _history[^1];
+        _history.RemoveAt(_history.Count - 1);
         IsPlaying = true;
+        PlayVersion++;
+        OnQueueChange?.Invoke();
         OnChange?.Invoke();
     }
 }
