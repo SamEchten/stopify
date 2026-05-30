@@ -14,6 +14,7 @@ public interface IPlayerStateService
     event Action? OnChange;
     event Action? OnQueueChange;
     void Play(Song song);
+    void PlayWithContext(Song song, IEnumerable<Song> context);
     void Pause();
     void Resume();
     void Stop();

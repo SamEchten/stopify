@@ -21,10 +21,26 @@ public class PlayerStateService : IPlayerStateService
     public void Play(Song song)
     {
         _history.Clear();
+        _queue.Clear();
         CurrentSong = song;
         IsPlaying = true;
         QueueIndex = -1;
         PlayVersion++;
+        OnQueueChange?.Invoke();
+        OnChange?.Invoke();
+    }
+
+    public void PlayWithContext(Song song, IEnumerable<Song> context)
+    {
+        _history.Clear();
+        _queue.Clear();
+        CurrentSong = song;
+        IsPlaying = true;
+        QueueIndex = -1;
+        PlayVersion++;
+        foreach (var s in context.SkipWhile(s => s.Id != song.Id).Skip(1))
+            _queue.Add(s);
+        OnQueueChange?.Invoke();
         OnChange?.Invoke();
     }
 
