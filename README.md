@@ -26,6 +26,35 @@ Both commands start the Docker containers (API + database) and launch the client
 make run-mac BUILD=1
 ```
 
+### Windows (without Make)
+
+**1. Start the API and database:**
+
+```powershell
+docker compose -f ./docker/docker-compose.yaml up -d
+```
+
+To rebuild the Docker image first, add `--build`:
+
+```powershell
+docker compose -f ./docker/docker-compose.yaml up -d --build
+```
+
+**2. Run the client:**
+
+```powershell
+cd client/Stopify
+dotnet run -f net9.0-windows10.0.19041.0
+```
+
+**Stop the stack:**
+
+```powershell
+docker compose -f ./docker/docker-compose.yaml down
+```
+
+---
+
 ### Stop the stack
 
 ```bash
